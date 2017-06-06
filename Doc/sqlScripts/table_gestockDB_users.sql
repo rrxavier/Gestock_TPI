@@ -1,0 +1,3 @@
+INSERT INTO `gestockdb`.`users` (`username`, `password`, `money`, `idRole_fk`) VALUES ('GestockAdmin', sha1('gestockTPI2017'), '10000', '2');
+INSERT INTO `gestockdb`.`users` (`username`, `password`, `money`, `idRole_fk`) VALUES ('UserTest1', sha1('userTest1Pwd'), '500', '1');
+INSERT INTO `gestockdb`.`users` (`username`, `password`, `money`, `idRole_fk`) VALUES ('UserTest2', sha1('userTest2Pwd'), '500', '1');

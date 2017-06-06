@@ -1,0 +1,9 @@
+INSERT INTO `gestockdb`.`stocks` (`shelf`) VALUES ('A1');
+INSERT INTO `gestockdb`.`stocks` (`shelf`) VALUES ('A2');
+INSERT INTO `gestockdb`.`stocks` (`shelf`) VALUES ('A3');
+INSERT INTO `gestockdb`.`stocks` (`shelf`) VALUES ('B1');
+INSERT INTO `gestockdb`.`stocks` (`shelf`) VALUES ('B2');
+INSERT INTO `gestockdb`.`stocks` (`shelf`) VALUES ('B3');
+INSERT INTO `gestockdb`.`stocks` (`shelf`) VALUES ('C1');
+INSERT INTO `gestockdb`.`stocks` (`shelf`) VALUES ('C2');
+INSERT INTO `gestockdb`.`stocks` (`shelf`) VALUES ('C3');
