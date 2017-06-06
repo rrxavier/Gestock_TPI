@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Client :  127.0.0.1
--- Généré le :  Mar 06 Juin 2017 à 11:34
+-- Généré le :  Mar 06 Juin 2017 à 13:06
 -- Version du serveur :  5.6.15-log
 -- Version de PHP :  5.5.8
 
@@ -38,15 +38,17 @@ CREATE TABLE IF NOT EXISTS `carts` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `carts_has_products`
+-- Structure de la table `carts_has_stocks`
 --
 
-CREATE TABLE IF NOT EXISTS `carts_has_products` (
+CREATE TABLE IF NOT EXISTS `carts_has_stocks` (
+  `id` int(11) NOT NULL,
   `idCart_fk` int(11) NOT NULL,
-  `idProduct_fk` int(11) NOT NULL,
+  `idStock_has_product_fk` int(11) NOT NULL,
   `quantity` int(11) NOT NULL,
-  PRIMARY KEY (`idCart_fk`,`idProduct_fk`),
-  KEY `idProduct_carts_has_products_idx` (`idProduct_fk`)
+  PRIMARY KEY (`id`),
+  KEY `idStock_carts_has_products_idx` (`idStock_has_product_fk`),
+  KEY `idCart_carts_has_products` (`idCart_fk`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -183,12 +185,14 @@ INSERT INTO `stocks` (`id`, `shelf`) VALUES
 --
 
 CREATE TABLE IF NOT EXISTS `stocks_has_products` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `idStock_fk` int(11) NOT NULL,
   `idProduct_fk` int(11) NOT NULL,
   `quantity` int(11) NOT NULL,
-  PRIMARY KEY (`idStock_fk`,`idProduct_fk`),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `idProduct_stock_has_products_idx` (`idProduct_fk`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -228,11 +232,11 @@ ALTER TABLE `carts`
   ADD CONSTRAINT `idUser_carts` FOREIGN KEY (`idUser_fk`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
--- Contraintes pour la table `carts_has_products`
+-- Contraintes pour la table `carts_has_stocks`
 --
-ALTER TABLE `carts_has_products`
+ALTER TABLE `carts_has_stocks`
   ADD CONSTRAINT `idCart_carts_has_products` FOREIGN KEY (`idCart_fk`) REFERENCES `carts` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  ADD CONSTRAINT `idProduct_carts_has_products` FOREIGN KEY (`idProduct_fk`) REFERENCES `products` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+  ADD CONSTRAINT `idStock_carts_has_products` FOREIGN KEY (`idStock_has_product_fk`) REFERENCES `stocks_has_products` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
 -- Contraintes pour la table `products`
@@ -244,8 +248,7 @@ ALTER TABLE `products`
 -- Contraintes pour la table `stocks_has_products`
 --
 ALTER TABLE `stocks_has_products`
-  ADD CONSTRAINT `idProduct_stock_has_products` FOREIGN KEY (`idProduct_fk`) REFERENCES `products` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  ADD CONSTRAINT `idStock_stock_has_products` FOREIGN KEY (`idStock_fk`) REFERENCES `stocks` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+  ADD CONSTRAINT `idProduct_stock_has_products` FOREIGN KEY (`idProduct_fk`) REFERENCES `products` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
 -- Contraintes pour la table `users`

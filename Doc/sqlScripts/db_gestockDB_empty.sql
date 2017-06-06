@@ -26,59 +26,13 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `GestockDB`.`products`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `GestockDB`.`products` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(50) NOT NULL,
-  `brand` VARCHAR(30) NOT NULL,
-  `price` DOUBLE NOT NULL,
-  `alertQuantity` INT NOT NULL,
-  `imgName` VARCHAR(50) NOT NULL,
-  `idCategory_fk` INT NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE INDEX `idProduct_UNIQUE` (`id` ASC),
-  UNIQUE INDEX `name_UNIQUE` (`name` ASC),
-  INDEX `idCategory_products_idx` (`idCategory_fk` ASC),
-  CONSTRAINT `idCategory_products`
-    FOREIGN KEY (`idCategory_fk`)
-    REFERENCES `GestockDB`.`categories` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
 -- Table `GestockDB`.`stocks`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `GestockDB`.`stocks` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `building` VARCHAR(20) NOT NULL,
   `shelf` CHAR(2) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE INDEX `id_UNIQUE` (`id` ASC))
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `GestockDB`.`stocks_has_products`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `GestockDB`.`stocks_has_products` (
-  `idStock_fk` INT NOT NULL,
-  `idProduct_fk` INT NOT NULL,
-  `quantity` INT NOT NULL,
-  PRIMARY KEY (`idStock_fk`, `idProduct_fk`),
-  INDEX `idProduct_stock_has_products_idx` (`idProduct_fk` ASC),
-  CONSTRAINT `idStock_stock_has_products`
-    FOREIGN KEY (`idStock_fk`)
-    REFERENCES `GestockDB`.`stocks` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `idProduct_stock_has_products`
-    FOREIGN KEY (`idProduct_fk`)
-    REFERENCES `GestockDB`.`products` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
@@ -116,6 +70,53 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
+-- Table `GestockDB`.`products`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `GestockDB`.`products` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(50) NOT NULL,
+  `brand` VARCHAR(30) NOT NULL,
+  `price` DOUBLE NOT NULL,
+  `alertQuantity` INT NOT NULL,
+  `imgName` VARCHAR(50) NOT NULL,
+  `idCategory_fk` INT NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `idProduct_UNIQUE` (`id` ASC),
+  UNIQUE INDEX `name_UNIQUE` (`name` ASC),
+  INDEX `idCategory_products_idx` (`idCategory_fk` ASC),
+  CONSTRAINT `idCategory_products`
+    FOREIGN KEY (`idCategory_fk`)
+    REFERENCES `GestockDB`.`categories` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `GestockDB`.`stocks_has_products`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `GestockDB`.`stocks_has_products` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `idStock_fk` INT NOT NULL,
+  `idProduct_fk` INT NOT NULL,
+  `quantity` INT NOT NULL,
+  INDEX `idProduct_stock_has_products_idx` (`idProduct_fk` ASC),
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `id_UNIQUE` (`id` ASC),
+  CONSTRAINT `idStock_stock_has_products`
+    FOREIGN KEY (`idStock_fk`)
+    REFERENCES `GestockDB`.`stocks` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `idProduct_stock_has_products`
+    FOREIGN KEY (`idProduct_fk`)
+    REFERENCES `GestockDB`.`products` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
 -- Table `GestockDB`.`carts`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `GestockDB`.`carts` (
@@ -134,22 +135,23 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `GestockDB`.`carts_has_products`
+-- Table `GestockDB`.`carts_has_stocks`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `GestockDB`.`carts_has_products` (
+CREATE TABLE IF NOT EXISTS `GestockDB`.`carts_has_stocks` (
+  `id` INT NOT NULL,
   `idCart_fk` INT NOT NULL,
-  `idProduct_fk` INT NOT NULL,
+  `idStock_has_product_fk` INT NOT NULL,
   `quantity` INT NOT NULL,
-  PRIMARY KEY (`idCart_fk`, `idProduct_fk`),
-  INDEX `idProduct_carts_has_products_idx` (`idProduct_fk` ASC),
+  PRIMARY KEY (`id`),
+  INDEX `idStock_carts_has_products_idx` (`idStock_has_product_fk` ASC),
   CONSTRAINT `idCart_carts_has_products`
     FOREIGN KEY (`idCart_fk`)
     REFERENCES `GestockDB`.`carts` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT `idProduct_carts_has_products`
-    FOREIGN KEY (`idProduct_fk`)
-    REFERENCES `GestockDB`.`products` (`id`)
+  CONSTRAINT `idStock_carts_has_products`
+    FOREIGN KEY (`idStock_has_product_fk`)
+    REFERENCES `GestockDB`.`stocks_has_products` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;

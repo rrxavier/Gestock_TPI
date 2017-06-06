@@ -1,0 +1,13 @@
+.features_items .figure .row
+{
+    height : 150px;
+    margin: 0 auto;
+    line-height: 150px;
+}
+
+.features_items .figure .row img
+{
+    display: inline-block;
+    margin: 0 auto;
+    max-height: 100%;
+}
