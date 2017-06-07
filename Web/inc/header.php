@@ -30,15 +30,15 @@
 					<div class="col-sm-6">
 						<div class="shop-menu pull-center">
 							<ul class="nav navbar-nav">
-								<li><a href="#"><i class="fa fa-user"></i>Mon compte</a></li>
-								<li><a href="cart.php"><i class="fa fa-shopping-cart"></i>Panier</a></li>
+								<li><a href="#"><i class="fa fa-user"></i>Account</a></li>
+								<li><a href="cart.php"><i class="fa fa-shopping-cart"></i>Cart</a></li>
 								<li><a href="login.php"><i class="fa fa-lock"></i>Login</a></li>
 							</ul>
 						</div>
 					</div>
 					<div class="col-sm-2">
 						<div class="search_box pull-right">
-							<input type="text" placeholder="Chercher..."/>
+							<input type="text" placeholder="Search..."/>
 						</div>
 					</div>
 				</div>

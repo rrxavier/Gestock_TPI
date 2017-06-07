@@ -1,160 +1,185 @@
--- MySQL Workbench Forward Engineering
+-- phpMyAdmin SQL Dump
+-- version 4.1.4
+-- http://www.phpmyadmin.net
+--
+-- Client :  127.0.0.1
+-- Généré le :  Mer 07 Juin 2017 à 13:50
+-- Version du serveur :  5.6.15-log
+-- Version de PHP :  5.5.8
 
-SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
-SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
-SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET time_zone = "+00:00";
 
--- -----------------------------------------------------
--- Schema GestockDB
--- -----------------------------------------------------
 
--- -----------------------------------------------------
--- Schema GestockDB
--- -----------------------------------------------------
-CREATE SCHEMA IF NOT EXISTS `GestockDB` DEFAULT CHARACTER SET utf8 ;
-USE `GestockDB` ;
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
 
--- -----------------------------------------------------
--- Table `GestockDB`.`categories`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `GestockDB`.`categories` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(45) NOT NULL,
+--
+-- Base de données :  `gestockdb`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `carts`
+--
+
+CREATE TABLE IF NOT EXISTS `carts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `idUser_fk` int(11) NOT NULL,
+  `dateOrder` date DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `id_UNIQUE` (`id` ASC))
-ENGINE = InnoDB;
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  KEY `idUser_carts_idx` (`idUser_fk`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
+-- --------------------------------------------------------
 
--- -----------------------------------------------------
--- Table `GestockDB`.`stocks`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `GestockDB`.`stocks` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `shelf` CHAR(2) NOT NULL,
+--
+-- Structure de la table `carts_has_stocks`
+--
+
+CREATE TABLE IF NOT EXISTS `carts_has_stocks` (
+  `id` int(11) NOT NULL,
+  `idCart_fk` int(11) NOT NULL,
+  `idStock_has_product_fk` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `id_UNIQUE` (`id` ASC))
-ENGINE = InnoDB;
+  KEY `idStock_carts_has_products_idx` (`idStock_has_product_fk`),
+  KEY `idCart_carts_has_products` (`idCart_fk`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+-- --------------------------------------------------------
 
--- -----------------------------------------------------
--- Table `GestockDB`.`roles`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `GestockDB`.`roles` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(15) NOT NULL,
+--
+-- Structure de la table `categories`
+--
+
+CREATE TABLE IF NOT EXISTS `categories` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(45) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `id_UNIQUE` (`id` ASC),
-  UNIQUE INDEX `name_UNIQUE` (`name` ASC))
-ENGINE = InnoDB;
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=9 ;
 
+-- --------------------------------------------------------
 
--- -----------------------------------------------------
--- Table `GestockDB`.`users`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `GestockDB`.`users` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `username` VARCHAR(45) NOT NULL,
-  `password` CHAR(40) NOT NULL,
-  `money` DOUBLE NOT NULL,
-  `idRole_fk` INT NOT NULL,
+--
+-- Structure de la table `products`
+--
+
+CREATE TABLE IF NOT EXISTS `products` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL,
+  `brand` varchar(30) NOT NULL,
+  `price` double NOT NULL,
+  `alertQuantity` int(11) NOT NULL,
+  `imgName` varchar(50) NOT NULL,
+  `idCategory_fk` int(11) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `id_UNIQUE` (`id` ASC),
-  UNIQUE INDEX `username_UNIQUE` (`username` ASC),
-  INDEX `idRole_users_idx` (`idRole_fk` ASC),
-  CONSTRAINT `idRole_users`
-    FOREIGN KEY (`idRole_fk`)
-    REFERENCES `GestockDB`.`roles` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+  UNIQUE KEY `idProduct_UNIQUE` (`id`),
+  UNIQUE KEY `name_UNIQUE` (`name`),
+  KEY `idCategory_products_idx` (`idCategory_fk`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=48 ;
 
+-- --------------------------------------------------------
 
--- -----------------------------------------------------
--- Table `GestockDB`.`products`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `GestockDB`.`products` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(50) NOT NULL,
-  `brand` VARCHAR(30) NOT NULL,
-  `price` DOUBLE NOT NULL,
-  `alertQuantity` INT NOT NULL,
-  `imgName` VARCHAR(50) NOT NULL,
-  `idCategory_fk` INT NOT NULL,
+--
+-- Doublure de structure pour la vue `products_with_category`
+--
+CREATE TABLE IF NOT EXISTS `products_with_category` (
+`id` int(11)
+,`name` varchar(50)
+,`brand` varchar(30)
+,`price` double
+,`alertQuantity` int(11)
+,`imgName` varchar(50)
+,`coategory` varchar(45)
+);
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `roles`
+--
+
+CREATE TABLE IF NOT EXISTS `roles` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(15) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `idProduct_UNIQUE` (`id` ASC),
-  UNIQUE INDEX `name_UNIQUE` (`name` ASC),
-  INDEX `idCategory_products_idx` (`idCategory_fk` ASC),
-  CONSTRAINT `idCategory_products`
-    FOREIGN KEY (`idCategory_fk`)
-    REFERENCES `GestockDB`.`categories` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  UNIQUE KEY `name_UNIQUE` (`name`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=3 ;
 
+-- --------------------------------------------------------
 
--- -----------------------------------------------------
--- Table `GestockDB`.`stocks_has_products`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `GestockDB`.`stocks_has_products` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `idStock_fk` INT NOT NULL,
-  `idProduct_fk` INT NOT NULL,
-  `quantity` INT NOT NULL,
-  INDEX `idProduct_stock_has_products_idx` (`idProduct_fk` ASC),
+--
+-- Structure de la table `stocks`
+--
+
+CREATE TABLE IF NOT EXISTS `stocks` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `shelf` char(2) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `id_UNIQUE` (`id` ASC),
-  CONSTRAINT `idStock_stock_has_products`
-    FOREIGN KEY (`idStock_fk`)
-    REFERENCES `GestockDB`.`stocks` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `idProduct_stock_has_products`
-    FOREIGN KEY (`idProduct_fk`)
-    REFERENCES `GestockDB`.`products` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=10 ;
 
+-- --------------------------------------------------------
 
--- -----------------------------------------------------
--- Table `GestockDB`.`carts`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `GestockDB`.`carts` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `idUser_fk` INT NOT NULL,
-  `dateOrder` DATE NULL,
+--
+-- Structure de la table `users`
+--
+
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(45) NOT NULL,
+  `password` char(40) NOT NULL,
+  `money` double NOT NULL,
+  `idRole_fk` int(11) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `id_UNIQUE` (`id` ASC),
-  INDEX `idUser_carts_idx` (`idUser_fk` ASC),
-  CONSTRAINT `idUser_carts`
-    FOREIGN KEY (`idUser_fk`)
-    REFERENCES `GestockDB`.`users` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  UNIQUE KEY `username_UNIQUE` (`username`),
+  KEY `idRole_users_idx` (`idRole_fk`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=4 ;
 
+-- --------------------------------------------------------
 
--- -----------------------------------------------------
--- Table `GestockDB`.`carts_has_stocks`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `GestockDB`.`carts_has_stocks` (
-  `id` INT NOT NULL,
-  `idCart_fk` INT NOT NULL,
-  `idStock_has_product_fk` INT NOT NULL,
-  `quantity` INT NOT NULL,
-  PRIMARY KEY (`id`),
-  INDEX `idStock_carts_has_products_idx` (`idStock_has_product_fk` ASC),
-  CONSTRAINT `idCart_carts_has_products`
-    FOREIGN KEY (`idCart_fk`)
-    REFERENCES `GestockDB`.`carts` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `idStock_carts_has_products`
-    FOREIGN KEY (`idStock_has_product_fk`)
-    REFERENCES `GestockDB`.`stocks_has_products` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+--
+-- Structure de la vue `products_with_category`
+--
+DROP TABLE IF EXISTS `products_with_category`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `products_with_category` AS select `products`.`id` AS `id`,`products`.`name` AS `name`,`products`.`brand` AS `brand`,`products`.`price` AS `price`,`products`.`alertQuantity` AS `alertQuantity`,`products`.`imgName` AS `imgName`,`categories`.`name` AS `coategory` from (`products` join `categories`) where (`products`.`idCategory_fk` = `categories`.`id`);
+
+--
+-- Contraintes pour les tables exportées
+--
+
+--
+-- Contraintes pour la table `carts`
+--
+ALTER TABLE `carts`
+  ADD CONSTRAINT `idUser_carts` FOREIGN KEY (`idUser_fk`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+--
+-- Contraintes pour la table `carts_has_stocks`
+--
+ALTER TABLE `carts_has_stocks`
+  ADD CONSTRAINT `idCart_carts_has_products` FOREIGN KEY (`idCart_fk`) REFERENCES `carts` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `idStock_carts_has_products` FOREIGN KEY (`idStock_has_product_fk`) REFERENCES `stocks_has_products` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+--
+-- Contraintes pour la table `products`
+--
+ALTER TABLE `products`
+  ADD CONSTRAINT `idCategory_products` FOREIGN KEY (`idCategory_fk`) REFERENCES `categories` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+--
+-- Contraintes pour la table `users`
+--
+ALTER TABLE `users`
+  ADD CONSTRAINT `idRole_users` FOREIGN KEY (`idRole_fk`) REFERENCES `roles` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 CREATE USER 'gestockAdminDB'@'127.0.0.1' IDENTIFIED BY 'gestockTPI2017';
 GRANT ALL PRIVILEGES ON `GestockDB`.* TO 'gestockAdminDB';

@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Client :  127.0.0.1
--- Généré le :  Mar 06 Juin 2017 à 13:06
+-- Généré le :  Mer 07 Juin 2017 à 13:49
 -- Version du serveur :  5.6.15-log
 -- Version de PHP :  5.5.8
 
@@ -96,7 +96,7 @@ CREATE TABLE IF NOT EXISTS `products` (
   UNIQUE KEY `idProduct_UNIQUE` (`id`),
   UNIQUE KEY `name_UNIQUE` (`name`),
   KEY `idCategory_products_idx` (`idCategory_fk`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=25 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=48 ;
 
 --
 -- Contenu de la table `products`
@@ -128,6 +128,20 @@ INSERT INTO `products` (`id`, `name`, `brand`, `price`, `alertQuantity`, `imgNam
 (23, 'Core i5 7600K BOX 3.8GHz', 'Intel', 256, 5, 'intelCorei57600KBOX.jpg', 1),
 (24, 'Pentium G4560 3.5GHz', 'Intel', 74.6, 5, 'intelPentiumG4560.jpg', 1);
 
+-- --------------------------------------------------------
+
+--
+-- Doublure de structure pour la vue `products_with_category`
+--
+CREATE TABLE IF NOT EXISTS `products_with_category` (
+`id` int(11)
+,`name` varchar(50)
+,`brand` varchar(30)
+,`price` double
+,`alertQuantity` int(11)
+,`imgName` varchar(50)
+,`coategory` varchar(45)
+);
 -- --------------------------------------------------------
 
 --
@@ -181,22 +195,6 @@ INSERT INTO `stocks` (`id`, `shelf`) VALUES
 -- --------------------------------------------------------
 
 --
--- Structure de la table `stocks_has_products`
---
-
-CREATE TABLE IF NOT EXISTS `stocks_has_products` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `idStock_fk` int(11) NOT NULL,
-  `idProduct_fk` int(11) NOT NULL,
-  `quantity` int(11) NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `id_UNIQUE` (`id`),
-  KEY `idProduct_stock_has_products_idx` (`idProduct_fk`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
-
--- --------------------------------------------------------
-
---
 -- Structure de la table `users`
 --
 
@@ -220,6 +218,15 @@ INSERT INTO `users` (`id`, `username`, `password`, `money`, `idRole_fk`) VALUES
 (1, 'GestockAdmin', 'f71a45cccb65de2fba32df9c3e386677989433eb', 10000, 2),
 (2, 'UserTest1', 'f5249ff6ce1714a780097b538f1a25c9ee2019b3', 500, 1),
 (3, 'UserTest2', '29ecc870799029da842a7f10c44a74b8c34e774d', 500, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la vue `products_with_category`
+--
+DROP TABLE IF EXISTS `products_with_category`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `products_with_category` AS select `products`.`id` AS `id`,`products`.`name` AS `name`,`products`.`brand` AS `brand`,`products`.`price` AS `price`,`products`.`alertQuantity` AS `alertQuantity`,`products`.`imgName` AS `imgName`,`categories`.`name` AS `coategory` from (`products` join `categories`) where (`products`.`idCategory_fk` = `categories`.`id`);
 
 --
 -- Contraintes pour les tables exportées
@@ -245,16 +252,13 @@ ALTER TABLE `products`
   ADD CONSTRAINT `idCategory_products` FOREIGN KEY (`idCategory_fk`) REFERENCES `categories` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
--- Contraintes pour la table `stocks_has_products`
---
-ALTER TABLE `stocks_has_products`
-  ADD CONSTRAINT `idProduct_stock_has_products` FOREIGN KEY (`idProduct_fk`) REFERENCES `products` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
-
---
 -- Contraintes pour la table `users`
 --
 ALTER TABLE `users`
   ADD CONSTRAINT `idRole_users` FOREIGN KEY (`idRole_fk`) REFERENCES `roles` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+CREATE USER 'gestockAdminDB'@'127.0.0.1' IDENTIFIED BY 'gestockTPI2017';
+GRANT ALL PRIVILEGES ON `GestockDB`.* TO 'gestockAdminDB';
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
