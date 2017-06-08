@@ -4,6 +4,25 @@
     border: 2px solid #696763;
 }
 
+#msgBox
+{
+    position: absolute;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    width: 500px;
+    line-height: 500px;
+    height: 100px;
+    background: rgb(179, 0, 0);
+
+    border-radius: 20px;
+}
+
+.navbar-fixed-bottom
+{
+    background: #D6D6D0
+}
+
 .features_items .figure .row
 {
     height : 150px;

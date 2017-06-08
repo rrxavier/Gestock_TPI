@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Client :  127.0.0.1
--- Généré le :  Mer 07 Juin 2017 à 13:49
+-- Généré le :  Jeu 08 Juin 2017 à 13:43
 -- Version du serveur :  5.6.15-log
 -- Version de PHP :  5.5.8
 
@@ -96,7 +96,7 @@ CREATE TABLE IF NOT EXISTS `products` (
   UNIQUE KEY `idProduct_UNIQUE` (`id`),
   UNIQUE KEY `name_UNIQUE` (`name`),
   KEY `idCategory_products_idx` (`idCategory_fk`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=48 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=25 ;
 
 --
 -- Contenu de la table `products`
@@ -140,7 +140,7 @@ CREATE TABLE IF NOT EXISTS `products_with_category` (
 ,`price` double
 ,`alertQuantity` int(11)
 ,`imgName` varchar(50)
-,`coategory` varchar(45)
+,`category` varchar(45)
 );
 -- --------------------------------------------------------
 
@@ -201,6 +201,7 @@ INSERT INTO `stocks` (`id`, `shelf`) VALUES
 CREATE TABLE IF NOT EXISTS `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `username` varchar(45) NOT NULL,
+  `email` varchar(75) NOT NULL,
   `password` char(40) NOT NULL,
   `money` double NOT NULL,
   `idRole_fk` int(11) NOT NULL,
@@ -214,10 +215,10 @@ CREATE TABLE IF NOT EXISTS `users` (
 -- Contenu de la table `users`
 --
 
-INSERT INTO `users` (`id`, `username`, `password`, `money`, `idRole_fk`) VALUES
-(1, 'GestockAdmin', 'f71a45cccb65de2fba32df9c3e386677989433eb', 10000, 2),
-(2, 'UserTest1', 'f5249ff6ce1714a780097b538f1a25c9ee2019b3', 500, 1),
-(3, 'UserTest2', '29ecc870799029da842a7f10c44a74b8c34e774d', 500, 1);
+INSERT INTO `users` (`id`, `username`, `email`, `password`, `money`, `idRole_fk`) VALUES
+(1, 'GestockAdmin', 'gestockAdmin@gmail.com', 'f71a45cccb65de2fba32df9c3e386677989433eb', 10000, 2),
+(2, 'UserTest1', 'userTest1@gmail.com', 'f5249ff6ce1714a780097b538f1a25c9ee2019b3', 500, 1),
+(3, 'UserTest2', 'userTest2@gmail.com', '29ecc870799029da842a7f10c44a74b8c34e774d', 500, 1);
 
 -- --------------------------------------------------------
 
@@ -226,7 +227,7 @@ INSERT INTO `users` (`id`, `username`, `password`, `money`, `idRole_fk`) VALUES
 --
 DROP TABLE IF EXISTS `products_with_category`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `products_with_category` AS select `products`.`id` AS `id`,`products`.`name` AS `name`,`products`.`brand` AS `brand`,`products`.`price` AS `price`,`products`.`alertQuantity` AS `alertQuantity`,`products`.`imgName` AS `imgName`,`categories`.`name` AS `coategory` from (`products` join `categories`) where (`products`.`idCategory_fk` = `categories`.`id`);
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `products_with_category` AS select `products`.`id` AS `id`,`products`.`name` AS `name`,`products`.`brand` AS `brand`,`products`.`price` AS `price`,`products`.`alertQuantity` AS `alertQuantity`,`products`.`imgName` AS `imgName`,`categories`.`name` AS `category` from (`products` join `categories`) where (`products`.`idCategory_fk` = `categories`.`id`);
 
 --
 -- Contraintes pour les tables exportées

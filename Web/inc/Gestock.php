@@ -16,8 +16,9 @@ class Gestock
     private $ps_nbProducts;
     private $ps_R_categories;
     private $ps_R_products;
-     private $ps_R_product_by_id;
+    private $ps_R_product_by_id;
     private $ps_R_product_of_category;
+    private $ps_C_user;
 
     /**
      * Constructor of the object. Initialises the PDO object and prepares the SQL statements.
@@ -48,6 +49,9 @@ class Gestock
             $this->ps_R_product_of_category = $this->dbc->prepare("SELECT SQL_CALC_FOUND_ROWS products.* FROM products WHERE products.idCategory_fk = :idCategory LIMIT :limit OFFSET :offset");
             $this->ps_R_product_of_category->bindParam(":limit", $limit, PDO::PARAM_INT);
             $this->ps_R_product_of_category->setFetchMode(PDO::FETCH_ASSOC);
+
+            $this->ps_C_user = $this->dbc->prepare("INSERT INTO users VALUES (null, :username, :email, :password, 500, 1)");
+            $this->ps_C_user->setFetchMode(PDO::FETCH_ASSOC);
         }
         catch (Exception $e)
         {
@@ -123,6 +127,23 @@ class Gestock
         $this->ps_R_product_of_category->bindParam(":idCategory", $idCategory, PDO::PARAM_INT);
         $this->ps_R_product_of_category->execute();
         return $this->ps_R_product_of_category->fetchAll();
+    }
+
+    public function insertUser($username, $email, $pwd)
+    {
+        try
+        {
+            $this->ps_C_user->bindParam(":username", $username);
+            $this->ps_C_user->bindParam(":email", $email);
+            $this->ps_C_user->bindParam(":password", $pwd);
+            $this->ps_C_user->execute();
+
+            return $this->ps_C_user->errorInfo();
+        }
+        catch (Exception $e)
+        {
+            return $e;
+        }
     }
 }
 

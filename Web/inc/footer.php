@@ -1,4 +1,4 @@
-		<div class="footer-bottom">
+		<div class="navbar-fixed-bottom">
 			<div class="container">
 				<div class="row">
 					<p class="pull-left">Copyright © 2017 Gestock Inc. Tous droits réservés. <b>ABOUT (À FAIRE)</b></p>
@@ -17,5 +17,6 @@
 	<script src="js/price-range.js"></script>
     <script src="js/jquery.prettyPhoto.js"></script>
     <script src="js/main.js"></script>
+	<script src="js/jquery-ui.js"></script>
 </body>
 </html>

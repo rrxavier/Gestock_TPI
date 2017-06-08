@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Client :  127.0.0.1
--- Généré le :  Mer 07 Juin 2017 à 13:50
+-- Généré le :  Jeu 08 Juin 2017 à 13:44
 -- Version du serveur :  5.6.15-log
 -- Version de PHP :  5.5.8
 
@@ -82,7 +82,7 @@ CREATE TABLE IF NOT EXISTS `products` (
   UNIQUE KEY `idProduct_UNIQUE` (`id`),
   UNIQUE KEY `name_UNIQUE` (`name`),
   KEY `idCategory_products_idx` (`idCategory_fk`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=48 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=25 ;
 
 -- --------------------------------------------------------
 
@@ -96,7 +96,7 @@ CREATE TABLE IF NOT EXISTS `products_with_category` (
 ,`price` double
 ,`alertQuantity` int(11)
 ,`imgName` varchar(50)
-,`coategory` varchar(45)
+,`category` varchar(45)
 );
 -- --------------------------------------------------------
 
@@ -134,6 +134,7 @@ CREATE TABLE IF NOT EXISTS `stocks` (
 CREATE TABLE IF NOT EXISTS `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `username` varchar(45) NOT NULL,
+  `email` varchar(75) NOT NULL,
   `password` char(40) NOT NULL,
   `money` double NOT NULL,
   `idRole_fk` int(11) NOT NULL,
@@ -150,7 +151,7 @@ CREATE TABLE IF NOT EXISTS `users` (
 --
 DROP TABLE IF EXISTS `products_with_category`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `products_with_category` AS select `products`.`id` AS `id`,`products`.`name` AS `name`,`products`.`brand` AS `brand`,`products`.`price` AS `price`,`products`.`alertQuantity` AS `alertQuantity`,`products`.`imgName` AS `imgName`,`categories`.`name` AS `coategory` from (`products` join `categories`) where (`products`.`idCategory_fk` = `categories`.`id`);
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `products_with_category` AS select `products`.`id` AS `id`,`products`.`name` AS `name`,`products`.`brand` AS `brand`,`products`.`price` AS `price`,`products`.`alertQuantity` AS `alertQuantity`,`products`.`imgName` AS `imgName`,`categories`.`name` AS `category` from (`products` join `categories`) where (`products`.`idCategory_fk` = `categories`.`id`);
 
 --
 -- Contraintes pour les tables exportées
@@ -180,10 +181,3 @@ ALTER TABLE `products`
 --
 ALTER TABLE `users`
   ADD CONSTRAINT `idRole_users` FOREIGN KEY (`idRole_fk`) REFERENCES `roles` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
-
-CREATE USER 'gestockAdminDB'@'127.0.0.1' IDENTIFIED BY 'gestockTPI2017';
-GRANT ALL PRIVILEGES ON `GestockDB`.* TO 'gestockAdminDB';
-
-SET SQL_MODE=@OLD_SQL_MODE;
-SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
-SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
