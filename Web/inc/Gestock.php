@@ -188,15 +188,16 @@ class Gestock
             $this->ps_R_user_by_username->bindParam(":password", $password);
             $this->ps_R_user_by_username->execute();
 
-            if(count($this->ps_R_user_by_username->fetchAll()) == 1)
-                return $this->ps_R_user_by_username->fetchAll();
+            $result = $this->ps_R_user_by_username->fetchAll();
+            if(count($result) == 1)
+                return $result;
             else
                 return false;
         }
         catch (Exception $e)
         {
             error_log($e);
-            return $e;
+            return false;
         }
     }
 
@@ -214,8 +215,9 @@ class Gestock
             $this->ps_R_user_by_email->bindParam(":password", $password);
             $this->ps_R_user_by_email->execute();
             
-            if(count($this->ps_R_user_by_email->fetchAll()) == 1)
-                return $this->ps_R_user_by_email->fetchAll();
+            $result = $this->ps_R_user_by_email->fetchAll();
+            if(count($result) == 1)
+                return $result;
             else
                 return false;
         }
