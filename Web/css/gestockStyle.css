@@ -18,6 +18,23 @@
     border-radius: 20px;
 }
 
+.accountBlock
+{
+    margin-top: 25px;
+    border: 2px solid rgba(105, 103, 99, 0.4);
+    border-radius: 25px;
+}
+
+.accountBlock h1
+{
+    color: #696763;
+}
+
+.accountBlock .row
+{
+    margin-bottom: 5px;
+}
+
 .navbar-fixed-bottom
 {
     background: #D6D6D0

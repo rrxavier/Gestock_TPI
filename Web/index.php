@@ -28,7 +28,7 @@
 				
 				<div class="col-sm-9 padding-right">
 					<div class="features_items"><!--features_items-->
-						<h2 class="title text-center">Produits</h2>
+						<h2 class="title text-center">Products</h2>
 						<?php							
 							echo DataToHtml::ProductsToHtml(Gestock::getInstance()->getProducts($page * NUMBER_PRODUCTS_SHOWN));
 							echo DataToHtml::PaginationToHtml($page);
