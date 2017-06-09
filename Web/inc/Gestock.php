@@ -147,6 +147,13 @@ class Gestock
         return $this->ps_R_product_of_category->fetchAll();
     }
 
+    /**
+     * Inserts a new user in the DB.
+     * @param type $username Username of the user.
+     * @param type $email Email of the user.
+     * @param type $pwd Password of the user. Must be sha1 encrypted.
+     * @return \Exception True if the query succeeded, False if there is an unknown error, and the name of the field if the username OR email already exist in base.
+     */
     public function insertUser($username, $email, $pwd)
     {
         try
@@ -156,14 +163,23 @@ class Gestock
             $this->ps_C_user->bindParam(":password", $pwd);
             $this->ps_C_user->execute();
 
-            return $this->ps_C_user->errorInfo();
+            return true;
         }
         catch (Exception $e)
         {
-            return $e;
+            error_log($e);
+            if($e->errorInfo[0] == 23000)  // Username or Email already in use.
+                    return explode("_", explode("'", $e->errorInfo[2])[3])[0];
+            return false;
         }
     }
 
+    /**
+     * Selects the user with the given username and password.
+     * @param type $username User's name.
+     * @param type $password User's password.
+     * @return \Exception Array with the user's info if it succeeds, false if it fails.
+     */
     public function authentifyByUsername($username, $password)
     {
         try
@@ -172,14 +188,24 @@ class Gestock
             $this->ps_R_user_by_username->bindParam(":password", $password);
             $this->ps_R_user_by_username->execute();
 
-            return $this->ps_R_user_by_username->fetchAll()/*[0]['result']*/;
+            if(count($this->ps_R_user_by_username->fetchAll()) == 1)
+                return $this->ps_R_user_by_username->fetchAll();
+            else
+                return false;
         }
         catch (Exception $e)
         {
+            error_log($e);
             return $e;
         }
     }
 
+    /**
+     * Selects the user with the given email and password.
+     * @param type $email User's email.
+     * @param type $password User's password.
+     * @return \Exception Array with the user's info if it succeeds, false if it fails.
+     */
     public function authentifyByEmail($email, $password)
     {
         try
@@ -187,12 +213,16 @@ class Gestock
             $this->ps_R_user_by_email->bindParam(":email", $email);
             $this->ps_R_user_by_email->bindParam(":password", $password);
             $this->ps_R_user_by_email->execute();
-
-            return $this->ps_R_user_by_email->fetchAll()/*[0]['result']*/;
+            
+            if(count($this->ps_R_user_by_email->fetchAll()) == 1)
+                return $this->ps_R_user_by_email->fetchAll();
+            else
+                return false;
         }
         catch (Exception $e)
         {
-            return $e;
+            error_log($e);
+            return false;
         }
     }
 }
