@@ -11,7 +11,9 @@
 	}
 	else
 		$page = 0;
+	$msg = FILTER_INPUT(INPUT_GET, "msg");
 ?>	
+
 	<section>
 		<div class="container">
 			<div class="row">
@@ -39,3 +41,4 @@
 		</div>
 	</section>
 	<?php require_once 'inc/footer.php'; ?>
+	<?php echo ($msg ? '<script>addPopup("' . $msg . '")</script>' : "") ; ?>

@@ -37,9 +37,7 @@
 								<h2><?php echo $product['name']; ?></h2>
 								<span>
 									<span><?php echo $product['price']; ?>.-</span>
-									<label>Quantity:</label>
-									<input type="text" value="3" />
-									<button type="button" class="btn btn-fefault cart">
+									<button type="button" class="btn btn-fefault cart" <?php echo 'onclick=addToCart(' . $product['id'] . ')'; ?>>
 										<i class="fa fa-shopping-cart"></i>
 										Add to cart
 									</button>

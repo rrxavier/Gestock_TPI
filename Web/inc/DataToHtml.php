@@ -39,7 +39,7 @@ class DataToHtml
                                 <div class="row"><a href="productDetails.php?id=' . $product['id'] . '"><img src="img/products/' . $product['imgName'] . '" class="figure-img img-fluid rounded img-responsive" alt="' . $product['name'] . '"></a></div>
                                 <figcaption class="figure-caption text-center"><b>' . $product['brand'] . '</b> ' . $product['name'] . '</figcaption>
                                 <figcaption class="figure-caption text-center">' . $product['price'] . '.-</figcaption>
-                                <a href="#" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</a>
+                                <a href="#" class="btn btn-default add-to-cart" onclick="addToCart(' . $product['id'] . ')"><i class="fa fa-shopping-cart"></i>Add to cart</a>
                             </figure>';
         }
         return $htmlToShow;
@@ -72,6 +72,46 @@ class DataToHtml
             $htmlToShow .= '<li><a href="' . basename($_SERVER['PHP_SELF']) . '?page=' . ($page + 1) . "&" . $actualParametterHTML . '" aria-label="Next">&raquo;</a></li></ul>';
         else
             $htmlToShow .= '<li class="disabled"><span aria-label="Next">&raquo;</span></li></ul>';
+
+        return $htmlToShow;
+    }
+
+    static public function CartProductsToHTML($idUser)
+    {
+        $htmlToShow = "";
+        $total = 0;
+
+        $result = Gestock::getInstance()->getCartProducts($_SESSION['user']['id']);
+
+        foreach($result as $product)
+        {
+            $htmlToShow .= '<tr>
+                <td>
+                    <a href="productDetails.php?id=' . $product['idProduct_fk'] . '"><img src="img/products/' . $product['imgName'] . '" alt=""></a>
+                </td>
+                <td class="cart_description">
+                    <h4><a href="productDetails.php?id=' . $product['idProduct_fk'] . '"><b>' . $product['brand'] . '</b> ' . $product['name'] . '</a></h4>
+                </td>
+                <td class="cart_price">
+                    <p>' . $product['price'] . '.-</p>
+                </td>
+                <td class="cart_quantity">
+                    <div class="cart_quantity_button">
+                        <a class="cart_quantity_up" href=""> + </a>
+                        <input class="cart_quantity_input" type="text" name="quantity" value="' . $product['nbProduct'] . '" autocomplete="off" size="2">
+                        <a class="cart_quantity_down" href=""> - </a>
+                    </div>
+                </td>
+                <td class="cart_total">
+                    <p class="cart_total_price">' . $product['nbProduct'] * $product['price'] . '.-</p>
+                </td>
+                <td class="cart_delete">
+                    <a class="cart_quantity_delete" href="deleteProductFromCart.php?id=' . $product['idProduct_fk'] . '"><i class="fa fa-times"></i></a>
+                </td>
+            </tr>';
+            $total += $product['nbProduct'] * $product['price'];
+        }
+        $htmlToShow .= '<tr><td></td><td></td><td></td><td></td><td class="cart_total"><p class="cart_total_price">' . $total . '.-</p></td></tr>';
 
         return $htmlToShow;
     }

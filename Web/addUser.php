@@ -15,7 +15,7 @@ if($username && $email && $pwd && $pwdConfirm)  // If the user correctly filled 
         if($pwd == $pwdConfirm) // If the passwords match.
         {
             $result = Gestock::getInstance()->insertUser($username, $email, sha1($pwd));
-            if(is_a($result, 'bool'))   // If the function returned a bool.
+            if(is_a($result, 'bool') || $result = 1)   // If the function returned a bool.
             {
                 if($result) // If the SQL query correctly executed.
                     header("Location: login.php?msg=User added !");

@@ -11,7 +11,6 @@
 		
 	<section id="form"><!--form-->
 		<div class="container">
-		<h4 id="alert" class="text-danger text-center"><?php echo ($msg ? $msg : "") ?></h4>
 			<div class="row">
 				<div class="col-sm-4 col-sm-offset-1">
 					<div class="login-form"><!--login form-->
@@ -46,14 +45,5 @@
 		</div>
 	</section><!--/form-->
 	<?php require_once 'inc/footer.php'; ?>
-	<script>
-		$(document).ready(function(){
-				$("#msgBox").hide();
-				$("#msgBox").show("slide", { direction: "up" }, 1000);
-			});
-
-		$("#msgBox").click(function(){
-      		$(this).hide("slide", { direction: "up" }, 1000); 
-		});
-	</script>
+	<?php echo ($msg ? '<script>addPopup("' . $msg . '")</script>' : "") ; ?>
 	

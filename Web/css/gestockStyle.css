@@ -4,6 +4,60 @@
     border: 2px solid #696763;
 }
 
+.glyphicon-remove
+{
+    width: inherit;
+    width: 500px;
+}
+
+.glyphicon-remove:hover
+{
+    background-color: #476b6b;
+}
+
+section table tr td
+{
+    height: 50px;
+    max-width: 100%;
+}
+
+section table tr td img
+{
+    height: 100%;
+    display: block;
+    margin: 0 auto;
+}
+
+.popup
+{
+    margin: auto;
+    width: min-content;
+    height: auto;
+    background-color: white;
+    color: black;
+    position: absolute;
+    top: 100px;
+    left: 0;
+    right: 0;
+    padding: 10px;
+    display: none;
+
+    border: solid gray 2px;
+    border-radius: 5px;
+}
+
+.popup div
+{
+    display: inline-block;
+    width: min-content;
+    white-space: nowrap;
+}
+
+.popup div h2
+{
+    display: inline-block;
+}
+
 #msgBox
 {
     position: absolute;

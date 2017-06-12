@@ -22,6 +22,12 @@ class Gestock
     private $ps_R_user_by_username;
     private $ps_R_user_by_email;
 
+    private $ps_R_cart;
+    private $ps_C_cart;
+    private $ps_C_carts_has_stocks;
+    private $ps_R_carts_has_stocks;
+    private $ps_D_carts_has_stocks;
+
     /**
      * Constructor of the object. Initialises the PDO object and prepares the SQL statements.
      */
@@ -67,9 +73,37 @@ class Gestock
             $this->ps_R_user_by_username->setFetchMode(PDO::FETCH_ASSOC);
 
             // Checks if the email/password combination exists. Used for authentification.
-            //$this->ps_R_user_by_email = $this->dbc->prepare("SELECT EXISTS (SELECT * FROM users WHERE users.email = :email AND users.password = :password) AS result");
             $this->ps_R_user_by_email = $this->dbc->prepare("SELECT * FROM users WHERE users.email = :email AND users.password = :password");
             $this->ps_R_user_by_email->setFetchMode(PDO::FETCH_ASSOC);
+
+            // Gets the current cart of the selected user. /!\ A cart is only a cart if it doesn't have a date of order. /!\
+            $this->ps_R_cart = $this->dbc->prepare("SELECT * FROM carts WHERE carts.idUser_fk = :idUser AND carts.dateOrder IS null");
+            $this->ps_R_cart->setFetchMode(PDO::FETCH_ASSOC);
+
+            // Creates a new cart for the selected user.
+            $this->ps_C_cart = $this->dbc->prepare("INSERT INTO carts VALUES (null, :idUser, null)");
+            $this->ps_C_cart->setFetchMode(PDO::FETCH_ASSOC);
+
+            // Inserts a product in a cart.
+            $this->ps_C_carts_has_stocks = $this->dbc->prepare("INSERT INTO carts_has_stocks SELECT null, :idCart, stocks_has_product.id, :quantity FROM stocks_has_product WHERE stocks_has_product.idProduct_fk = :idProduct");
+            $this->ps_C_carts_has_stocks->setFetchMode(PDO::FETCH_ASSOC);
+
+            // Gets all the items of the cart of the selected user.
+            $this->ps_R_carts_has_stocks = $this->dbc->prepare("SELECT *, SUM(carts_has_stocks.quantity) AS nbProduct FROM products, stocks_has_product, carts_has_stocks, carts 
+                                                                WHERE carts.idUser_fk = :idUser 
+                                                                AND  carts_has_stocks.idCart_fk = carts.id
+                                                                AND stocks_has_product.id = carts_has_stocks.idStock_has_product_fk
+                                                                AND products.id = stocks_has_product.idProduct_fk
+                                                                GROUP BY products.id");
+            $this->ps_R_carts_has_stocks->setFetchMode(PDO::FETCH_ASSOC);
+
+            // Deletes a product from the current cart of the user.
+            $this->ps_D_carts_has_stocks = $this->dbc->prepare("DELETE carts_has_stocks FROM carts, carts_has_stocks, stocks_has_product 
+                                                                WHERE carts.idUser_fk = :idUser
+                                                                AND carts_has_stocks.idCart_fk = carts.id 
+                                                                AND carts_has_stocks.idStock_has_product_fk = stocks_has_product.id
+                                                                AND stocks_has_product.idProduct_fk = :idProduct");
+            $this->ps_D_carts_has_stocks->setFetchMode(PDO::FETCH_ASSOC);
         }
         catch (Exception $e)
         {
@@ -220,6 +254,84 @@ class Gestock
                 return $result;
             else
                 return false;
+        }
+        catch (Exception $e)
+        {
+            error_log($e);
+            return false;
+        }
+    }
+
+    private function getCart($idUser)
+    {
+         try
+        {
+            $this->ps_R_cart->bindParam(":idUser", $idUser, PDO::PARAM_INT);
+            $this->ps_R_cart->execute();
+
+            $result = $this->ps_R_cart->fetchAll();
+
+            if(count($result) == 1)
+                return $result;
+            else
+            {
+                $this->ps_C_cart->bindParam(":idUser", $idUser, PDO::PARAM_INT);
+                $this->ps_C_cart->execute();
+                $this->ps_R_cart->execute();
+
+                return $this->ps_R_cart->fetchAll();
+            }
+        }
+        catch (Exception $e)
+        {
+            error_log($e);
+            return $e;
+        }
+    }
+
+    public function insertProductIntoCart($idProduct, $quantity, $idUser)
+    {
+        try
+        {
+            $this->ps_C_carts_has_stocks->bindParam(":idCart", $this->getCart($idUser)[0]['id'], PDO::PARAM_INT);
+            $this->ps_C_carts_has_stocks->bindParam(":quantity", $quantity, PDO::PARAM_INT);
+            $this->ps_C_carts_has_stocks->bindParam(":idProduct", $idProduct, PDO::PARAM_INT);
+            $this->ps_C_carts_has_stocks->execute();
+
+            return true;
+        }
+        catch (Exception $e)
+        {
+            error_log($e);
+            return false;
+        }
+    }
+
+    public function getCartProducts($idUser)
+    {
+        try
+        {
+            $this->ps_R_carts_has_stocks->bindParam(":idUser", $idUser);
+            $this->ps_R_carts_has_stocks->execute();
+
+            return $this->ps_R_carts_has_stocks->fetchAll(); 
+        }
+        catch (Exception $e)
+        {
+            error_log($e);
+            return false;
+        }
+    }
+
+    public function deleteProductFromCart($idProduct, $idUser)
+    {
+        try
+        {
+            $this->ps_D_carts_has_stocks->bindParam(":idProduct", $idProduct, PDO::PARAM_INT);
+            $this->ps_D_carts_has_stocks->bindParam(":idUser", $idUser, PDO::PARAM_INT);
+            $this->ps_D_carts_has_stocks->execute();
+
+            return true;
         }
         catch (Exception $e)
         {
