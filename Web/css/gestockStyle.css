@@ -4,6 +4,29 @@
     border: 2px solid #696763;
 }
 
+a
+{
+    color: #476b6b; 
+}
+
+.cartPreview
+{
+    height: min-content;
+}
+
+.btnOrder
+{
+    width: 60%;
+    background: #476b6b;
+    border: 0 none;
+    border-radius: 0;
+    color: white;
+    font-family: 'Roboto', sans-serif;
+    font-size: 15px;
+    margin-bottom: 25px;
+    border-radius: 5px;
+}
+
 .glyphicon-remove
 {
     width: inherit;

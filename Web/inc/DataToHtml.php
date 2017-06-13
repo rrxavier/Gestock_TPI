@@ -1,5 +1,15 @@
 <?php
 
+#--------------------------------------------------------------------------
+# TPI 2017 - Author :   Oliveira Ricardo
+# Filename :            DataToHtml.php
+# Date :                14.06.17
+#--------------------------------------------------------------------------
+# Build the HTML code from the data returned by "Gestock".
+#
+# Version 1.0 :         14.06.17
+#--------------------------------------------------------------------------
+
 require_once 'inc/Gestock.php';
 
 /**
@@ -31,7 +41,7 @@ class DataToHtml
      * @return string The HTML code for the products.
      */
     static public function ProductsToHtml($products)
-    {
+    {   
         $htmlToShow = "";
         foreach($products as $product)
         {
@@ -46,10 +56,10 @@ class DataToHtml
     }
     
     /**
-     * Build the HTML code to build the paging of any file.
+     * Builds the HTML code to build the paging of any file.
      * @param int $page Current page of the file.
      * @param array $actualParametter Any additionnal parametter to add to the URL.
-     * @return string The HTML code for the pagination, and the link.
+     * @return string The HTML code for the pagination, and the links.
      */
     static public function PaginationToHtml($page, $actualParametter = array("name" => "", "value" => null))
     {
@@ -76,6 +86,11 @@ class DataToHtml
         return $htmlToShow;
     }
 
+    /**
+     * Builds the HTML code to show in the cart page.
+     * @param type $idUser ID of the owner of the cart.
+     * @return string The built HTML code.
+     */
     static public function CartProductsToHTML($idUser)
     {
         $htmlToShow = "";
@@ -87,10 +102,10 @@ class DataToHtml
         {
             $htmlToShow .= '<tr>
                 <td>
-                    <a href="productDetails.php?id=' . $product['idProduct_fk'] . '"><img src="img/products/' . $product['imgName'] . '" alt=""></a>
+                    <a href="productDetails.php?id=' . $product['id'] . '"><img src="img/products/' . $product['imgName'] . '" alt=""></a>
                 </td>
                 <td class="cart_description">
-                    <h4><a href="productDetails.php?id=' . $product['idProduct_fk'] . '"><b>' . $product['brand'] . '</b> ' . $product['name'] . '</a></h4>
+                    <h4><a href="productDetails.php?id=' . $product['id'] . '"><b>' . $product['brand'] . '</b> ' . $product['name'] . '</a></h4>
                 </td>
                 <td class="cart_price">
                     <p>' . $product['price'] . '.-</p>
@@ -106,12 +121,30 @@ class DataToHtml
                     <p class="cart_total_price">' . $product['nbProduct'] * $product['price'] . '.-</p>
                 </td>
                 <td class="cart_delete">
-                    <a class="cart_quantity_delete" href="deleteProductFromCart.php?id=' . $product['idProduct_fk'] . '"><i class="fa fa-times"></i></a>
+                    <a class="cart_quantity_delete" href="deleteProductFromCart.php?id=' . $product['id'] . '"><i class="fa fa-times"></i></a>
                 </td>
             </tr>';
             $total += $product['nbProduct'] * $product['price'];
         }
         $htmlToShow .= '<tr><td></td><td></td><td></td><td></td><td class="cart_total"><p class="cart_total_price">' . $total . '.-</p></td></tr>';
+        $htmlToShow .= '<tr><td colspan="6" class="text-center"><a href="passOrder.php" class="btn btn-default btnOrder"><h4>Order</h4></a></td></tr>';
+
+        return $htmlToShow;
+    }
+
+    /**
+     * Builds the HTML code to show in the account page, under the "Cart preview" section.
+     * @param type $idUser ID of the owner of the cart.
+     * @return string The build HTML code
+     */
+    static public function CartPreview($idUser)
+    {
+        $htmlToShow = "";
+        $htmlToShow .= '<table>';
+        foreach(Gestock::getInstance()->getFirstCartProducts($_SESSION['user']['id']) as $product)
+            $htmlToShow .= '<tr><td class="col-sm-2"><img src="img/products/' . $product['imgName'] . '"></td><td class="col-sm-6"><b>' . $product['brand'] . '</b> ' . $product['name'] . '</td><td class="cart_price col-sm-3"><p>' . $product['price'] . '</p></td></tr>';
+        $htmlToShow .= '</table>';
+        $htmlToShow .= '<div class="text-center"><a href="cart.php">Go to cart</a></div>';
 
         return $htmlToShow;
     }

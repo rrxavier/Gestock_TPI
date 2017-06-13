@@ -1,5 +1,17 @@
 <?php
 
+#--------------------------------------------------------------------------
+# TPI 2017 - Author :   Oliveira Ricardo
+# Filename :            Gestock.php
+# Date :                14.06.17
+#--------------------------------------------------------------------------
+# Main class of the website. It mainly does the SQL requests.
+# All the prepare statements are created in the object constructor.
+# Then, they're encapsulated in functions that execute them.
+#
+# Version 1.0 :         14.06.17
+#--------------------------------------------------------------------------
+
 define("HOST", "127.0.0.1");
 define("DBNAME", "gestockDB");
 define("USER", "gestockAdminDB");
@@ -21,12 +33,15 @@ class Gestock
     private $ps_C_user;
     private $ps_R_user_by_username;
     private $ps_R_user_by_email;
+    private $ps_R_user_by_id;
 
     private $ps_R_cart;
     private $ps_C_cart;
     private $ps_C_carts_has_stocks;
     private $ps_R_carts_has_stocks;
     private $ps_D_carts_has_stocks;
+    private $ps_R_carts_has_stocks_limit;
+    private $ps_R_carts_has_stocks_totalPrice;
 
     /**
      * Constructor of the object. Initialises the PDO object and prepares the SQL statements.
@@ -89,7 +104,7 @@ class Gestock
             $this->ps_C_carts_has_stocks->setFetchMode(PDO::FETCH_ASSOC);
 
             // Gets all the items of the cart of the selected user.
-            $this->ps_R_carts_has_stocks = $this->dbc->prepare("SELECT *, SUM(carts_has_stocks.quantity) AS nbProduct FROM products, stocks_has_product, carts_has_stocks, carts 
+            $this->ps_R_carts_has_stocks = $this->dbc->prepare("SELECT products.*, SUM(carts_has_stocks.quantity) AS nbProduct FROM products, stocks_has_product, carts_has_stocks, carts 
                                                                 WHERE carts.idUser_fk = :idUser 
                                                                 AND  carts_has_stocks.idCart_fk = carts.id
                                                                 AND stocks_has_product.id = carts_has_stocks.idStock_has_product_fk
@@ -104,6 +119,31 @@ class Gestock
                                                                 AND carts_has_stocks.idStock_has_product_fk = stocks_has_product.id
                                                                 AND stocks_has_product.idProduct_fk = :idProduct");
             $this->ps_D_carts_has_stocks->setFetchMode(PDO::FETCH_ASSOC);
+
+            // Gets the first five most expensive products. Used for the cart preview.
+            $this->ps_R_carts_has_stocks_limit = $this->dbc->prepare("SELECT products.*, SUM(carts_has_stocks.quantity) AS nbProduct FROM products, stocks_has_product, carts_has_stocks, carts 
+                                                                WHERE carts.idUser_fk = :idUser 
+                                                                AND  carts_has_stocks.idCart_fk = carts.id
+                                                                AND stocks_has_product.id = carts_has_stocks.idStock_has_product_fk
+                                                                AND products.id = stocks_has_product.idProduct_fk
+                                                                GROUP BY products.id
+                                                                ORDER BY products.price DESC
+                                                                LIMIT 5 OFFSET 0");
+            $this->ps_R_carts_has_stocks_limit->setFetchMode(PDO::FETCH_ASSOC);
+
+            // Gets the total price of the cart of the selected user.
+            $this->ps_R_carts_has_stocks_totalPrice = $this->dbc->prepare("SELECT SUM(products.price) AS totalPrice FROM products, stocks_has_product, carts_has_stocks, carts 
+                                                                WHERE carts.idUser_fk = :idUser
+                                                                AND  carts_has_stocks.idCart_fk = carts.id
+                                                                AND stocks_has_product.id = carts_has_stocks.idStock_has_product_fk
+                                                                AND products.id = stocks_has_product.idProduct_fk
+                                                                GROUP BY carts.id");
+            $this->ps_R_carts_has_stocks_totalPrice->setFetchMode(PDO::FETCH_ASSOC);
+
+            // Gets all the info of the given user.
+            $this->ps_R_user_by_id = $this->dbc->prepare("SELECT * FROM users WHERE users.id = :idUser");
+            $this->ps_R_user_by_id->setFetchMode(PDO::FETCH_ASSOC);
+            
         }
         catch (Exception $e)
         {
@@ -186,7 +226,7 @@ class Gestock
      * @param type $username Username of the user.
      * @param type $email Email of the user.
      * @param type $pwd Password of the user. Must be sha1 encrypted.
-     * @return \Exception True if the query succeeded, False if there is an unknown error, and the name of the field if the username OR email already exist in base.
+     * @return \Exception TRUE if the query succeeded, False if there is an unknown error, and the name of the field if the username OR email already exist in base.
      */
     public function insertUser($username, $email, $pwd)
     {
@@ -212,7 +252,7 @@ class Gestock
      * Selects the user with the given username and password.
      * @param type $username User's name.
      * @param type $password User's password.
-     * @return \Exception Array with the user's info if it succeeds, false if it fails.
+     * @return \Exception Array with the user's info if it succeeds, FALSE if it fails.
      */
     public function authentifyByUsername($username, $password)
     {
@@ -239,7 +279,7 @@ class Gestock
      * Selects the user with the given email and password.
      * @param type $email User's email.
      * @param type $password User's password.
-     * @return \Exception Array with the user's info if it succeeds, false if it fails.
+     * @return \Exception Array with the user's info if it succeeds, FALSE if it fails.
      */
     public function authentifyByEmail($email, $password)
     {
@@ -262,6 +302,11 @@ class Gestock
         }
     }
 
+    /**
+     * Get the current cart of a given user. If he doesn't have one, creates it.
+     * @param type $idUser  The id of the owner of the cart.
+     * @return \Exception   The cart if the script successfully executed, FALSE if an error occurred.
+     */
     private function getCart($idUser)
     {
          try
@@ -289,6 +334,13 @@ class Gestock
         }
     }
 
+    /**
+     * Adds the selected product into the cart.
+     * @param type $idProduct ID of the product to add.
+     * @param type $quantity Quantity to add.
+     * @param type $idUser ID of the owner of the cart.
+     * @return boolean TRUE if everything goes well, FALSE if an error occurred.
+     */
     public function insertProductIntoCart($idProduct, $quantity, $idUser)
     {
         try
@@ -307,6 +359,11 @@ class Gestock
         }
     }
 
+    /**
+     * Gets all the products of the cart of the selected user.
+     * @param type $idUser ID of the owner of the cart.
+     * @return boolean Array with the product if everything went well, FALSE if an error occurred.
+     */
     public function getCartProducts($idUser)
     {
         try
@@ -323,6 +380,12 @@ class Gestock
         }
     }
 
+    /**
+     * Delets a given product from the cart of the selected user.
+     * @param type $idProduct ID of the product to delete.
+     * @param type $idUser ID of the owner of the cart.
+     * @return boolean TRUE if everything went well, FALSE if an error occurred.
+     */
     public function deleteProductFromCart($idProduct, $idUser)
     {
         try
@@ -332,6 +395,76 @@ class Gestock
             $this->ps_D_carts_has_stocks->execute();
 
             return true;
+        }
+        catch (Exception $e)
+        {
+            error_log($e);
+            return false;
+        }
+    }
+
+    /**
+     * Gets the first five products of the user's cart. The products are ordered from the most expensive to the cheapest.
+     * @param type $idUser ID of the owner of the cart.
+     * @return type Array with the products if everything went well, empty Array if an error occurred.
+     */
+    public function getFirstCartProducts($idUser)
+    {
+        try
+        {
+            $this->ps_R_carts_has_stocks_limit->bindParam(":idUser", $idUser);
+            $this->ps_R_carts_has_stocks_limit->execute();
+
+            return $this->ps_R_carts_has_stocks_limit->fetchAll();
+        }
+        catch (Exception $e)
+        {
+            error_log($e);
+            return Array();
+        }
+    }
+
+    public function passOrder($idUser)
+    {
+        try
+        {
+            $itemCount = count($this->getCartProducts($idUser)); 
+
+            if($itemCount > 0)
+            {
+                /* Check si tous les items sont en stock.
+                    SELECT * FROM (SELECT products.*, stocks_has_product.quantity, SUM(carts_has_stocks.quantity), stocks_has_product.quantity - SUM(carts_has_stocks.quantity) AS stockQuantityResult  FROM products, stocks_has_product, carts_has_stocks, carts
+                    WHERE carts.idUser_fk = 2
+                    AND carts_has_stocks.idCart_fk = carts.id
+                    AND stocks_has_product.id = carts_has_stocks.idStock_has_product_fk
+                    AND products.id = stocks_has_product.idProduct_fk
+                    GROUP BY products.id) as tmpTable
+                    WHERE tmpTable.stockQuantityResult < 0
+                */
+
+                /*SI TOUS LES ITEMS SONT EN STOCK
+                DÉBUT
+                    $this->ps_R_carts_has_stocks_totalPrice->bindParam(":idUser", $idUser);
+                    $this->ps_R_carts_has_stocks_totalPrice->execute();
+                    $totalPrice = $this->ps_R_carts_has_stocks_totalPrice->fetchAll()[0]['totalPrice'];
+
+                    $this->ps_R_user_by_id->bindParam(":idUser", $idUser);
+                    $this->ps_R_user_by_id->execute();
+                    $user = $this->ps_R_user_by_id->fetchAll()[0];
+
+                    if($totalPrice <= $user['money'])
+                    {
+
+                    }
+                    else
+                        return "NotEnoughMoney";
+                FIN
+                SINON
+                DEBUT
+                    RETUORNE Tous les items ne sont pas en stock. + NOMS ITEMS */           
+            }
+            else
+                return "NoItemsInCart";
         }
         catch (Exception $e)
         {

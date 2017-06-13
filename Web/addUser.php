@@ -1,12 +1,21 @@
 <?php
+
+#--------------------------------------------------------------------------
+# TPI 2017 - Author :   Oliveira Ricardo
+# Filename :            addUser.php
+# Date :                09.06.17
+#--------------------------------------------------------------------------
+# This file adds a new user in the DB if all fields have been filled.
+#
+# Version 1.0 :         09.06.17
+#--------------------------------------------------------------------------
+
 require_once 'inc/Gestock.php';
 
 $username = filter_input(INPUT_POST, "username");
 $email = filter_input(INPUT_POST, "userEmail", FILTER_VALIDATE_EMAIL);
 $pwd = filter_input(INPUT_POST, "userPassword");
 $pwdConfirm = filter_input(INPUT_POST, "userPasswordConfirm");
-
-print_r($_POST);
 
 if($username && $email && $pwd && $pwdConfirm)  // If the user correctly filled all fields.
 {

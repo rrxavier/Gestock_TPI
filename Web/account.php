@@ -1,5 +1,18 @@
 <?php
+
+#--------------------------------------------------------------------------
+# TPI 2017 - Author :   Oliveira Ricardo
+# Filename :            account.php
+# Date :                09.06.17
+#--------------------------------------------------------------------------
+# Shows the user informations, a preview of his current cart and a preview of his past orders.
+#
+# Version 1.0 :         09.06.17
+#--------------------------------------------------------------------------
+
 require_once 'inc/header.php';
+require_once 'inc/DataToHtml.php';
+require_once 'inc/Gestock.php';
 
 if(!isset($_SESSION['user']))
     header('Location: login.php');
@@ -29,10 +42,12 @@ if(!isset($_SESSION['user']))
             </div>
         </div>
         <div class="row">
-            <div class="col-sm-5 text-center">
-                <div class="accountBlock">
-                    <div class="text-center"><h1>Cart</h1></div>
-                    
+            <div class="col-sm-5 text-right">
+                <div class="accountBlock cartPreview">
+                    <div class="text-center"><h1>Cart preview</h1></div>
+                    <?php
+                    echo DataToHtml::CartPreview($_SESSION['user']['id']);
+                    ?>
                 </div>
             </div>
             <div class="col-sm-5 col-sm-offset-2">

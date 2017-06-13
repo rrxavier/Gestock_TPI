@@ -1,4 +1,15 @@
 <?php
+
+#--------------------------------------------------------------------------
+# TPI 2017 - Author :   Oliveira Ricardo
+# Filename :            authentification.php
+# Date :                09.06.17
+#--------------------------------------------------------------------------
+# This file is used to log the user in if the username/password OR the email/password combination is correct.
+#
+# Version 1.0 :         09.06.17
+#--------------------------------------------------------------------------
+
 require_once 'inc/Gestock.php';
 session_start();
 

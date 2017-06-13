@@ -8,13 +8,7 @@ $msg = FILTER_INPUT(INPUT_GET, "msg");
 ?>
 <section id="cart_items">
     <div class="container">
-        <div class="breadcrumbs">
-            <ol class="breadcrumb">
-                <li><a href="index.php">Home</a></li>
-                <li class="active">Shopping Cart</li>
-            </ol>
-        </div>
-        <div class="table-responsive cart_info">
+        <div class="table-responsive cart_info m-t-5">
             <table class="table table-condensed">
                 <thead>
                     <tr class="cart_menu">
