@@ -25,7 +25,7 @@ class Gestock
 {
     private static $objInstance;
     private $dbc = null;
-    private $ps_nbProducts;
+    private $ps_cartQuantitys;
     private $ps_R_categories;
     private $ps_R_products;
     private $ps_R_product_by_id;
@@ -34,14 +34,22 @@ class Gestock
     private $ps_R_user_by_username;
     private $ps_R_user_by_email;
     private $ps_R_user_by_id;
+    private $ps_U_user_money;
+    private $ps_U_stocks_quantity;
 
     private $ps_R_cart;
     private $ps_C_cart;
     private $ps_C_carts_has_stocks;
     private $ps_R_carts_has_stocks;
+    private $ps_R_carts_has_stocks_oneProduct;
+    private $ps_U_carts_has_stocks_quantity;
     private $ps_D_carts_has_stocks;
+    private $ps_D_carts_has_stocks_oneProduct;
     private $ps_R_carts_has_stocks_limit;
     private $ps_R_carts_has_stocks_totalPrice;
+    private $ps_R_carts_has_stocks_notInStock;
+    private $ps_U_carts;
+    
 
     /**
      * Constructor of the object. Initialises the PDO object and prepares the SQL statements.
@@ -52,13 +60,13 @@ class Gestock
         { 
             // PDO initialisation
             $this->dbc = new PDO('mysql:host=' . HOST . ';dbname=' . DBNAME, USER, PASSWORD, 
-                                array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8",
-                                    PDO::ATTR_PERSISTENT => true,
-                                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
+                            array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8",
+                                PDO::ATTR_PERSISTENT => true,
+                                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
 
             // Gets the value processed by the SQL_CALC_FOUND_ROWS. Used to return the total number of items of a given category.
-            $this->ps_nbProducts = $this->dbc->prepare("SELECT FOUND_ROWS() AS NB_ROWS");
-            $this->ps_nbProducts->setFetchMode(PDO::FETCH_ASSOC);
+            $this->ps_cartQuantitys = $this->dbc->prepare("SELECT FOUND_ROWS() AS NB_ROWS");
+            $this->ps_cartQuantitys->setFetchMode(PDO::FETCH_ASSOC);
 
             // Selects all categories.
             $this->ps_R_categories = $this->dbc->prepare("SELECT categories.* FROM categories");
@@ -70,8 +78,8 @@ class Gestock
             $this->ps_R_products->bindParam(":limit", $limit, PDO::PARAM_INT);
             $this->ps_R_products->setFetchMode(PDO::FETCH_ASSOC);
 
-            // Selects all the info of a certain product for his details page.
-            $this->ps_R_product_by_id = $this->dbc->prepare("SELECT products_with_category.* FROM products_with_category WHERE products_with_category.id = :idProduct");
+            // Selects all the info of a certain product.
+            $this->ps_R_product_by_id = $this->dbc->prepare("SELECT products_with_info.* FROM products_with_info WHERE products_with_info.id = :idProduct");
             $this->ps_R_product_by_id->setFetchMode(PDO::FETCH_ASSOC);
 
             // Selects the next 9(NUMBER_PRODUCTS_SHOWN) products of a given category.
@@ -104,28 +112,62 @@ class Gestock
             $this->ps_C_carts_has_stocks->setFetchMode(PDO::FETCH_ASSOC);
 
             // Gets all the items of the cart of the selected user.
-            $this->ps_R_carts_has_stocks = $this->dbc->prepare("SELECT products.*, SUM(carts_has_stocks.quantity) AS nbProduct FROM products, stocks_has_product, carts_has_stocks, carts 
+            $this->ps_R_carts_has_stocks = $this->dbc->prepare("SELECT products_with_info.*, carts_has_stocks.quantity AS cartQuantity FROM products_with_info, stocks_has_product, carts_has_stocks, carts 
+                                                                WHERE carts.idUser_fk = :idUser 
+                                                                AND  carts_has_stocks.idCart_fk = carts.id
+                                                                AND stocks_has_product.id = carts_has_stocks.idStock_has_product_fk
+                                                                AND products_with_info.id = stocks_has_product.idProduct_fk
+                                                                AND carts.dateOrder IS null
+                                                                GROUP BY products_with_info.id");
+            $this->ps_R_carts_has_stocks->setFetchMode(PDO::FETCH_ASSOC);
+
+            // Gets the given item of the selected user's cart.
+            $this->ps_R_carts_has_stocks_oneProduct = $this->dbc->prepare("SELECT products.*, carts_has_stocks.quantity AS cartQuantity FROM products, stocks_has_product, carts_has_stocks, carts 
                                                                 WHERE carts.idUser_fk = :idUser 
                                                                 AND  carts_has_stocks.idCart_fk = carts.id
                                                                 AND stocks_has_product.id = carts_has_stocks.idStock_has_product_fk
                                                                 AND products.id = stocks_has_product.idProduct_fk
+                                                                AND products.id = :idProduct
+                                                                AND carts.dateOrder IS null
                                                                 GROUP BY products.id");
-            $this->ps_R_carts_has_stocks->setFetchMode(PDO::FETCH_ASSOC);
+            $this->ps_R_carts_has_stocks_oneProduct->setFetchMode(PDO::FETCH_ASSOC);
+
+            // Sets the new quantity of the item in the user cart.
+            $this->ps_U_carts_has_stocks_quantity = $this->dbc->prepare("UPDATE carts_has_stocks, products, stocks_has_product, carts 
+                                                                SET carts_has_stocks.quantity = :quantity + carts_has_stocks.quantity
+                                                                WHERE carts.idUser_fk = :idUser 
+                                                                AND  carts_has_stocks.idCart_fk = carts.id
+                                                                AND stocks_has_product.id = carts_has_stocks.idStock_has_product_fk
+                                                                AND products.id = stocks_has_product.idProduct_fk
+                                                                AND carts.dateOrder IS null
+                                                                AND products.id = :idProduct");
+            $this->ps_U_carts_has_stocks_quantity->setFetchMode(PDO::FETCH_ASSOC);
+
+            // Deletes completely a product from the current cart of the user.
+            $this->ps_D_carts_has_stocks = $this->dbc->prepare("DELETE carts_has_stocks FROM carts, carts_has_stocks, stocks_has_product 
+                                                                WHERE carts.idUser_fk = :idUser
+                                                                AND carts_has_stocks.idCart_fk = carts.id 
+                                                                AND carts_has_stocks.idStock_has_product_fk = stocks_has_product.id
+                                                                AND stocks_has_product.idProduct_fk = :idProduct
+                                                                AND carts.dateOrder IS null");
+            $this->ps_D_carts_has_stocks->setFetchMode(PDO::FETCH_ASSOC);
 
             // Deletes a product from the current cart of the user.
             $this->ps_D_carts_has_stocks = $this->dbc->prepare("DELETE carts_has_stocks FROM carts, carts_has_stocks, stocks_has_product 
                                                                 WHERE carts.idUser_fk = :idUser
                                                                 AND carts_has_stocks.idCart_fk = carts.id 
                                                                 AND carts_has_stocks.idStock_has_product_fk = stocks_has_product.id
-                                                                AND stocks_has_product.idProduct_fk = :idProduct");
+                                                                AND stocks_has_product.idProduct_fk = :idProduct
+                                                                AND carts.dateOrder IS null");
             $this->ps_D_carts_has_stocks->setFetchMode(PDO::FETCH_ASSOC);
 
             // Gets the first five most expensive products. Used for the cart preview.
-            $this->ps_R_carts_has_stocks_limit = $this->dbc->prepare("SELECT products.*, SUM(carts_has_stocks.quantity) AS nbProduct FROM products, stocks_has_product, carts_has_stocks, carts 
+            $this->ps_R_carts_has_stocks_limit = $this->dbc->prepare("SELECT products.*, carts_has_stocks.quantity AS cartQuantity FROM products, stocks_has_product, carts_has_stocks, carts 
                                                                 WHERE carts.idUser_fk = :idUser 
                                                                 AND  carts_has_stocks.idCart_fk = carts.id
                                                                 AND stocks_has_product.id = carts_has_stocks.idStock_has_product_fk
                                                                 AND products.id = stocks_has_product.idProduct_fk
+                                                                AND carts.dateOrder IS null
                                                                 GROUP BY products.id
                                                                 ORDER BY products.price DESC
                                                                 LIMIT 5 OFFSET 0");
@@ -137,13 +179,36 @@ class Gestock
                                                                 AND  carts_has_stocks.idCart_fk = carts.id
                                                                 AND stocks_has_product.id = carts_has_stocks.idStock_has_product_fk
                                                                 AND products.id = stocks_has_product.idProduct_fk
+                                                                AND carts.dateOrder IS null
                                                                 GROUP BY carts.id");
             $this->ps_R_carts_has_stocks_totalPrice->setFetchMode(PDO::FETCH_ASSOC);
 
             // Gets all the info of the given user.
             $this->ps_R_user_by_id = $this->dbc->prepare("SELECT * FROM users WHERE users.id = :idUser");
             $this->ps_R_user_by_id->setFetchMode(PDO::FETCH_ASSOC);
-            
+
+            // Gets all the items that are in a cart but with not enough in stock.
+            $this->ps_R_carts_has_stocks_notInStock = $this->dbc->prepare("SELECT * FROM (SELECT products.*, stocks_has_product.quantity, carts_has_stocks.quantity AS cartQuantity, (stocks_has_product.quantity  - SUM(carts_has_stocks.quantity)) AS stockQuantityResult FROM products, stocks_has_product, carts_has_stocks, carts
+                                                                           WHERE carts.idUser_fk = :idUser
+                                                                           AND carts_has_stocks.idCart_fk = carts.id
+                                                                           AND stocks_has_product.id = carts_has_stocks.idStock_has_product_fk
+                                                                           AND products.id = stocks_has_product.idProduct_fk
+                                                                           AND carts.dateOrder IS null
+                                                                           GROUP BY products.id) as tmpTable
+                                                                           WHERE tmpTable.stockQuantityResult < 0");
+            $this->ps_R_carts_has_stocks_notInStock->setFetchMode(PDO::FETCH_ASSOC);
+
+            // Sets an order date in a given cart.
+            $this->ps_U_cart = $this->dbc->prepare("UPDATE carts SET dateOrder = NOW() WHERE carts.idUser_fk = :idUser AND carts.dateOrder IS null");
+            $this->ps_U_cart->setFetchMode(PDO::FETCH_ASSOC);
+
+            // Debits the amout of the order from the user's money pool.
+            $this->ps_U_user_money = $this->dbc->prepare("UPDATE users SET users.money = users.money - :cost WHERE users.id = :idUser");
+            $this->ps_U_user_money->setFetchMode(PDO::FETCH_ASSOC);
+
+            // Substracts the quantity of the order from the quantity in the stock.
+            $this->ps_U_stocks_quantity = $this->dbc->prepare("UPDATE stocks_has_product SET stocks_has_product.quantity = stocks_has_product.quantity - :quantity WHERE stocks_has_product.idProduct_fk = :idProduct");
+            $this->ps_U_stocks_quantity->setFetchMode(PDO::FETCH_ASSOC);
         }
         catch (Exception $e)
         {
@@ -167,10 +232,10 @@ class Gestock
      * Processes the total number of products of the last set of products.
      * @return array 
      */
-    public function getNbProducts()
+    public function getcartQuantitys()
     {
-        $this->ps_nbProducts->execute();
-        return $this->ps_nbProducts->fetchAll();
+        $this->ps_cartQuantitys->execute();
+        return $this->ps_cartQuantitys->fetchAll();
     }
 
     /**
@@ -345,11 +410,31 @@ class Gestock
     {
         try
         {
-            $this->ps_C_carts_has_stocks->bindParam(":idCart", $this->getCart($idUser)[0]['id'], PDO::PARAM_INT);
-            $this->ps_C_carts_has_stocks->bindParam(":quantity", $quantity, PDO::PARAM_INT);
-            $this->ps_C_carts_has_stocks->bindParam(":idProduct", $idProduct, PDO::PARAM_INT);
-            $this->ps_C_carts_has_stocks->execute();
+            $this->ps_R_carts_has_stocks_oneProduct->bindParam(":idUser", $idUser);
+            $this->ps_R_carts_has_stocks_oneProduct->bindParam(":idProduct", $idProduct);
+            $this->ps_R_carts_has_stocks_oneProduct->execute();
+            $existingLine = $this->ps_R_carts_has_stocks_oneProduct->fetchAll();
 
+
+            if(count($existingLine) == 1) // IF EXISTS : CHANGER QUANTITY
+            {
+                if($quantity + $existingLine[0]['cartQuantity'] == 0)   // IF the user is DELETING and the quantity reaches 0 or less : DELETE THE ROW
+                    $this->deleteProductFromCart($idProduct, $idUser);
+                else    // ELSE : CHANGE QUANTITY
+                {
+                    $this->ps_U_carts_has_stocks_quantity->bindParam(":idUser", $idUser);
+                    $this->ps_U_carts_has_stocks_quantity->bindParam(":quantity", $quantity);
+                    $this->ps_U_carts_has_stocks_quantity->bindParam(":idProduct", $idProduct);
+                    $this->ps_U_carts_has_stocks_quantity->execute();
+                }
+            }
+            else    // ELSE : CREATE ROW
+            {
+                $this->ps_C_carts_has_stocks->bindParam(":idCart", $this->getCart($idUser)[0]['id'], PDO::PARAM_INT);
+                $this->ps_C_carts_has_stocks->bindParam(":quantity", $quantity, PDO::PARAM_INT);
+                $this->ps_C_carts_has_stocks->bindParam(":idProduct", $idProduct, PDO::PARAM_INT);
+                $this->ps_C_carts_has_stocks->execute();
+            }
             return true;
         }
         catch (Exception $e)
@@ -432,18 +517,13 @@ class Gestock
 
             if($itemCount > 0)
             {
-                /* Check si tous les items sont en stock.
-                    SELECT * FROM (SELECT products.*, stocks_has_product.quantity, SUM(carts_has_stocks.quantity), stocks_has_product.quantity - SUM(carts_has_stocks.quantity) AS stockQuantityResult  FROM products, stocks_has_product, carts_has_stocks, carts
-                    WHERE carts.idUser_fk = 2
-                    AND carts_has_stocks.idCart_fk = carts.id
-                    AND stocks_has_product.id = carts_has_stocks.idStock_has_product_fk
-                    AND products.id = stocks_has_product.idProduct_fk
-                    GROUP BY products.id) as tmpTable
-                    WHERE tmpTable.stockQuantityResult < 0
-                */
-
-                /*SI TOUS LES ITEMS SONT EN STOCK
-                DÉBUT
+                $this->ps_R_carts_has_stocks_notInStock->bindParam(":idUser", $idUser);
+                $this->ps_R_carts_has_stocks_notInStock->execute();
+                $notInStockItems = $this->ps_R_carts_has_stocks_notInStock->fetchAll();
+                if(count($notInStockItems))
+                    return "NotInStock";
+                else
+                {
                     $this->ps_R_carts_has_stocks_totalPrice->bindParam(":idUser", $idUser);
                     $this->ps_R_carts_has_stocks_totalPrice->execute();
                     $totalPrice = $this->ps_R_carts_has_stocks_totalPrice->fetchAll()[0]['totalPrice'];
@@ -454,14 +534,23 @@ class Gestock
 
                     if($totalPrice <= $user['money'])
                     {
+                        // ps_U_stocks_quantity + COMPLEXE !!!
+                        $this->ps_U_stocks_quantity->bindParam(":quantity", $totalPrice);
+                        $this->ps_U_stocks_quantity->bindParam(":idProduct", $idUser);
+                        $this->ps_U_stocks_quantity->execute();
 
+                        $this->ps_U_cart->bindParam(":idUser", $idUser);
+                        $this->ps_U_cart->execute();
+
+                        $this->ps_U_user_money->bindParam(":cost", $totalPrice);
+                        $this->ps_U_user_money->bindParam(":idUser", $idUser);
+                        $this->ps_U_user_money->execute();                       
+
+                        return true;
                     }
                     else
                         return "NotEnoughMoney";
-                FIN
-                SINON
-                DEBUT
-                    RETUORNE Tous les items ne sont pas en stock. + NOMS ITEMS */           
+                }        
             }
             else
                 return "NoItemsInCart";

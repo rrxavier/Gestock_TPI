@@ -20,6 +20,7 @@ else    // If he's connected.
 {
     $idProduct = filter_input(INPUT_POST, "idProduct");
     $quantity = filter_input(INPUT_POST, "quantity", FILTER_VALIDATE_INT);
+    // echo $idProduct, ' ', $quantity;
     if($idProduct && $quantity)     // If both these values are set and correct.
         echo Gestock::getInstance()->insertProductIntoCart($idProduct, $quantity, $_SESSION['user']['id']);
     else    // There is no product OR no quantity.

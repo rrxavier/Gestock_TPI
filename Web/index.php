@@ -1,6 +1,7 @@
 <?php 
 	require_once 'inc/header.php';
 	require_once 'inc/DataToHtml.php';
+	ob_start();
 
 	$page = 0;
 	if(filter_input(INPUT_GET, "page", FILTER_VALIDATE_INT))

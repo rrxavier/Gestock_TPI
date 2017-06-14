@@ -1,0 +1,14 @@
+User :
+	account.php
+	cart.php
+	category.php
+	index.php
+	login.php
+	productDetails.php
+
+Scripts :
+	addToCart.php
+	addUser.php
+	authentification.php
+	deleteProductFromCart.php
+	passOrder.php

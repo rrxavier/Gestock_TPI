@@ -20,7 +20,7 @@ if(!isset($_SESSION['user']))
 $result = Gestock::getInstance()->passOrder($_SESSION['user']['id']);
 
 print_r($result);
-/*if(is_bool($result))
+if(is_bool($result))
 {
     if($result)
         header('Location: index.php?msg=Order successfully passed !');
@@ -30,8 +30,10 @@ print_r($result);
 else
 {
     if($result == 'NoItemsInCart')
-        header('Location: index.php?msg=Your cart has no products !');
-}*/
+        header('Location: cart.php?msg=Your cart has no products !');
+    if($result == 'NotInStock')
+    header('Location: cart.php?msg=Some items aren\'t in stock !');
+}
 
 
 

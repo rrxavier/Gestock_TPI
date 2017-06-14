@@ -8,7 +8,7 @@ function addPopup(msg)
     }, 2000);
 }
 
-function addToCart(idProduct, quantity = 1)
+function addToCart(idProduct, returnPopup = true, quantity = 1)
 {
     $.ajax({
             method: 'POST',
@@ -16,17 +16,18 @@ function addToCart(idProduct, quantity = 1)
             data: {'idProduct': idProduct, 'quantity': quantity},
             dataType: 'html',
             success: function (data) {
-                if (data == "NotConnected")
+                // alert(data);
+                if (data == "NotConnected" && returnPopup)
                     window.location.replace("login.php");
-                else if (data == "NoProduct")
+                else if (data == "NoProduct" && returnPopup)
                     addPopup("Please select a product !");
-                else if (data)
+                else if (data && returnPopup)
                     addPopup("Added to the cart !");
-                else
+                else if(returnPopup)
                     addPopup("Error, try again.");
             },
             error: function(jqXHR) {
-                alert(jqXHR.responseText + "" + jqXHR.status);
+                // alert(jqXHR.responseText + "" + jqXHR.status);
             }
     });
 }
