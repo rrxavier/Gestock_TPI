@@ -25,7 +25,7 @@ class Gestock
 {
     private static $objInstance;
     private $dbc = null;
-    private $ps_cartQuantitys;
+    private $ps_nbProducts;
     private $ps_R_categories;
     private $ps_R_products;
     private $ps_R_product_by_id;
@@ -49,6 +49,9 @@ class Gestock
     private $ps_R_carts_has_stocks_totalPrice;
     private $ps_R_carts_has_stocks_notInStock;
     private $ps_U_carts;
+
+    private $ps_R_previousOrders_limit;
+    private $ps_R_previousOrder_products;
     
 
     /**
@@ -65,8 +68,8 @@ class Gestock
                                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
 
             // Gets the value processed by the SQL_CALC_FOUND_ROWS. Used to return the total number of items of a given category.
-            $this->ps_cartQuantitys = $this->dbc->prepare("SELECT FOUND_ROWS() AS NB_ROWS");
-            $this->ps_cartQuantitys->setFetchMode(PDO::FETCH_ASSOC);
+            $this->ps_nbProducts = $this->dbc->prepare("SELECT FOUND_ROWS() AS NB_ROWS");
+            $this->ps_nbProducts->setFetchMode(PDO::FETCH_ASSOC);
 
             // Selects all categories.
             $this->ps_R_categories = $this->dbc->prepare("SELECT categories.* FROM categories");
@@ -174,7 +177,7 @@ class Gestock
             $this->ps_R_carts_has_stocks_limit->setFetchMode(PDO::FETCH_ASSOC);
 
             // Gets the total price of the cart of the selected user.
-            $this->ps_R_carts_has_stocks_totalPrice = $this->dbc->prepare("SELECT SUM(products.price) AS totalPrice FROM products, stocks_has_product, carts_has_stocks, carts 
+            $this->ps_R_carts_has_stocks_totalPrice = $this->dbc->prepare("SELECT SUM(products.price * carts_has_stocks.quantity) AS totalPrice FROM products, stocks_has_product, carts_has_stocks, carts 
                                                                 WHERE carts.idUser_fk = :idUser
                                                                 AND  carts_has_stocks.idCart_fk = carts.id
                                                                 AND stocks_has_product.id = carts_has_stocks.idStock_has_product_fk
@@ -203,12 +206,35 @@ class Gestock
             $this->ps_U_cart->setFetchMode(PDO::FETCH_ASSOC);
 
             // Debits the amout of the order from the user's money pool.
-            $this->ps_U_user_money = $this->dbc->prepare("UPDATE users SET users.money = users.money - :cost WHERE users.id = :idUser");
+            $this->ps_U_user_money = $this->dbc->prepare("UPDATE users SET users.money = (users.money - :cost) WHERE users.id = :idUser");
             $this->ps_U_user_money->setFetchMode(PDO::FETCH_ASSOC);
 
             // Substracts the quantity of the order from the quantity in the stock.
-            $this->ps_U_stocks_quantity = $this->dbc->prepare("UPDATE stocks_has_product SET stocks_has_product.quantity = stocks_has_product.quantity - :quantity WHERE stocks_has_product.idProduct_fk = :idProduct");
+            $this->ps_U_stocks_quantity = $this->dbc->prepare("UPDATE stocks_has_product, products_with_info, carts_has_stocks, carts 
+                                                                SET stocks_has_product.quantity = stocks_has_product.quantity - carts_has_stocks.quantity
+                                                                WHERE carts.idUser_fk = :idUser 
+                                                                AND  carts_has_stocks.idCart_fk = carts.id
+                                                                AND stocks_has_product.id = carts_has_stocks.idStock_has_product_fk
+                                                                AND products_with_info.id = stocks_has_product.idProduct_fk
+                                                                AND carts.dateOrder IS null");
             $this->ps_U_stocks_quantity->setFetchMode(PDO::FETCH_ASSOC);
+
+            // Gets the first five most expensive products. Used for the cart preview.
+            $this->ps_R_previousOrders_limit = $this->dbc->prepare("SELECT carts.* FROM carts 
+                                                                    WHERE carts.idUser_fk = :idUser 
+                                                                    AND carts.dateOrder IS NOT null
+                                                                    ORDER BY carts.id DESC
+                                                                    LIMIT 5 OFFSET 0");
+            $this->ps_R_previousOrders_limit->setFetchMode(PDO::FETCH_ASSOC);
+
+            $this->ps_R_previousOrder_products = $this->dbc->prepare('SELECT products_with_info.*, carts_has_stocks.quantity AS cartQuantity FROM products_with_info, stocks_has_product, carts_has_stocks, carts 
+                                                                WHERE carts.idUser_fk = :idUser 
+                                                                AND carts.id = :idCart
+                                                                AND carts_has_stocks.idCart_fk = carts.id
+                                                                AND stocks_has_product.id = carts_has_stocks.idStock_has_product_fk
+                                                                AND products_with_info.id = stocks_has_product.idProduct_fk
+                                                                AND carts.dateOrder IS NOT null');
+            $this->ps_R_previousOrder_products->setFetchMode(PDO::FETCH_ASSOC);
         }
         catch (Exception $e)
         {
@@ -232,10 +258,10 @@ class Gestock
      * Processes the total number of products of the last set of products.
      * @return array 
      */
-    public function getcartQuantitys()
+    public function getNbProducts()
     {
-        $this->ps_cartQuantitys->execute();
-        return $this->ps_cartQuantitys->fetchAll();
+        $this->ps_nbProducts->execute();
+        return $this->ps_nbProducts->fetchAll();
     }
 
     /**
@@ -509,6 +535,22 @@ class Gestock
         }
     }
 
+    public function getUserInfo($idUser)
+    {
+        try
+        {
+            $this->ps_R_user_by_id->bindParam(":idUser", $idUser);
+            $this->ps_R_user_by_id->execute();
+
+            return $this->ps_R_user_by_id->fetchAll();
+        }
+        catch (Exception $e)
+        {
+            error_log($e);
+            return null;
+        }
+    }
+
     public function passOrder($idUser)
     {
         try
@@ -528,15 +570,13 @@ class Gestock
                     $this->ps_R_carts_has_stocks_totalPrice->execute();
                     $totalPrice = $this->ps_R_carts_has_stocks_totalPrice->fetchAll()[0]['totalPrice'];
 
-                    $this->ps_R_user_by_id->bindParam(":idUser", $idUser);
-                    $this->ps_R_user_by_id->execute();
-                    $user = $this->ps_R_user_by_id->fetchAll()[0];
+                    $user = $this->getUserInfo($idUser)[0];
 
                     if($totalPrice <= $user['money'])
                     {
-                        // ps_U_stocks_quantity + COMPLEXE !!!
-                        $this->ps_U_stocks_quantity->bindParam(":quantity", $totalPrice);
-                        $this->ps_U_stocks_quantity->bindParam(":idProduct", $idUser);
+                        $this->dbc->beginTransaction();
+
+                        $this->ps_U_stocks_quantity->bindParam(":idUser", $idUser);
                         $this->ps_U_stocks_quantity->execute();
 
                         $this->ps_U_cart->bindParam(":idUser", $idUser);
@@ -545,6 +585,8 @@ class Gestock
                         $this->ps_U_user_money->bindParam(":cost", $totalPrice);
                         $this->ps_U_user_money->bindParam(":idUser", $idUser);
                         $this->ps_U_user_money->execute();                       
+
+                        $this->dbc->commit();
 
                         return true;
                     }
@@ -557,8 +599,43 @@ class Gestock
         }
         catch (Exception $e)
         {
+            if(PDO::inTransaction())
+                $this->dbc->rollback();
             error_log($e);
             return false;
+        }
+    }
+
+    public function getFirstPreviousOrdersProducts($idUser)
+    {
+        try
+        {
+            $this->ps_R_previousOrders_limit->bindParam(":idUser", $idUser);
+            $this->ps_R_previousOrders_limit->execute();
+
+            return $this->ps_R_previousOrders_limit->fetchAll();
+        }
+        catch (Exception $e)
+        {
+            error_log($e);
+            return Array();
+        }
+    }
+
+    public function getPreviousOrderProducts($idUser, $idCart)
+    {
+        try
+        {
+            $this->ps_R_previousOrder_products->bindParam(":idUser", $idUser);
+            $this->ps_R_previousOrder_products->bindParam(":idCart", $idCart);
+            $this->ps_R_previousOrder_products->execute();
+
+            return $this->ps_R_previousOrder_products->fetchAll();
+        }
+        catch (Exception $e)
+        {
+            error_log($e);
+            return Array();
         }
     }
 }

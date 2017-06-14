@@ -63,7 +63,7 @@ class DataToHtml
      */
     static public function PaginationToHtml($page, $actualParametter = array("name" => "", "value" => null))
     {
-        $nbPages = Gestock::getInstance()->getcartQuantitys()[0]['NB_ROWS'] / NUMBER_PRODUCTS_SHOWN;
+        $nbPages = Gestock::getInstance()->getNbProducts()[0]['NB_ROWS'] / NUMBER_PRODUCTS_SHOWN;
 
         $actualParametterHTML = "";
         if($actualParametter['value'] != null)
@@ -99,7 +99,7 @@ class DataToHtml
         $htmlToShow = "";
         $total = 0;
 
-        $result = Gestock::getInstance()->getCartProducts($_SESSION['user']['id']);
+        $result = Gestock::getInstance()->getCartProducts($idUser);
 
         foreach($result as $product)
         {
@@ -144,11 +144,58 @@ class DataToHtml
     {
         $htmlToShow = "";
         $htmlToShow .= '<table>';
-        foreach(Gestock::getInstance()->getFirstCartProducts($_SESSION['user']['id']) as $product)
+        foreach(Gestock::getInstance()->getFirstCartProducts($idUser) as $product)
             $htmlToShow .= '<tr><td class="col-sm-2"><img src="img/products/' . $product['imgName'] . '"></td><td class="col-sm-6"><b>' . $product['brand'] . '</b> ' . $product['name'] . '</td><td class="cart_price col-sm-3"><p>' . $product['price'] . '</p></td></tr>';
         $htmlToShow .= '</table>';
         $htmlToShow .= '<div class="text-center"><a href="cart.php">Go to cart</a></div>';
 
+        return $htmlToShow;
+    }
+
+    static public function PreviousOrdersPreview($idUser)
+    {
+        $htmlToShow = "";
+        $htmlToShow .= '<table>';
+        foreach(Gestock::getInstance()->getFirstPreviousOrdersProducts($idUser) as $order)
+            $htmlToShow .= '<tr><td class="col-sm-9 text-center"><b>' . $order['dateOrder'] . '</b></td><td><a href="previousOrderDetail.php?id=' . $order['id'] . '">Check details</a></td></tr>';
+        $htmlToShow .= '</table>';
+        $htmlToShow .= '<div class="text-center"><a href="cart.php">Get the full list</a></div>';
+
+        return $htmlToShow;
+    }
+
+    static public function PreviousOrderProductsToHTML($idUser)
+    {
+
+        $htmlToShow = "";
+        $total = 0;
+        foreach($products as $product)
+        {
+            $htmlToShow .=  '<tr>
+                <td class="col-sm-1">
+                    <a href="productDetails.php?id=' . $product['id'] . '"><img src="img/products/' . $product['imgName'] . '" alt=""></a>
+                </td>
+                <td class="cart_description col-sm-4">
+                    <h4><a href="productDetails.php?id=' . $product['id'] . '"><b>' . $product['brand'] . '</b> ' . $product['name'] . '</a></h4>
+                </td>
+                <td class="col-sm-2">
+                    <h4>' . $product['category'] . '</h4>
+                </td>
+                <td class="cart_price col-sm-2">
+                    <p>' . $product['price'] . '.-</p>
+                </td>
+                <td class="cart_quantity col-sm-1">
+                    <div class="row text-center">
+                        <div class="col-sm-6">' . $product['cartQuantity'] . '</div>
+                    </div>
+                </td>
+                <td class="cart_total col-sm-2 text-center">
+                    <p class="cart_total_price">' . $product['cartQuantity'] * $product['price'] . '.-</p>
+                </td>
+            </tr>';
+            $total += $product['cartQuantity'] * $product['price'];
+        }
+        $htmlToShow .= '<tr><td></td><td></td><td></td><td></td><td></td><td class="cart_total"><p class="cart_total_price text-center">' . $total . '.-</p></td></tr>';   
         return $htmlToShow;
     }
 }

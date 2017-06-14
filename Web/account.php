@@ -16,6 +16,8 @@ require_once 'inc/Gestock.php';
 
 if(!isset($_SESSION['user']))
     header('Location: login.php');
+
+$_SESSION['user'] = Gestock::getInstance()->getUserInfo($_SESSION['user']['id'])[0];
 ?>
 
 <section>
@@ -53,6 +55,9 @@ if(!isset($_SESSION['user']))
             <div class="col-sm-5 col-sm-offset-2">
                 <div class="accountBlock">
                     <div class="text-center"><h1>Previous orders</h1></div>
+                    <?php
+                    echo DataToHtml::PreviousOrdersPreview($_SESSION['user']['id']);
+                    ?>
                 </div>
             </div>
         </div>
