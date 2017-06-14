@@ -52,7 +52,7 @@ class Gestock
 
     private $ps_R_previousOrders_limit;
     private $ps_R_previousOrder_products;
-    
+    private $ps_R_previousOrders;    
 
     /**
      * Constructor of the object. Initialises the PDO object and prepares the SQL statements.
@@ -235,6 +235,13 @@ class Gestock
                                                                 AND products_with_info.id = stocks_has_product.idProduct_fk
                                                                 AND carts.dateOrder IS NOT null');
             $this->ps_R_previousOrder_products->setFetchMode(PDO::FETCH_ASSOC);
+
+            // Gets the first five most expensive products. Used for the cart preview.
+            $this->ps_R_previousOrders = $this->dbc->prepare("SELECT carts.* FROM carts 
+                                                                    WHERE carts.idUser_fk = :idUser 
+                                                                    AND carts.dateOrder IS NOT null
+                                                                    ORDER BY carts.id DESC");
+            $this->ps_R_previousOrders->setFetchMode(PDO::FETCH_ASSOC); 
         }
         catch (Exception $e)
         {
@@ -606,7 +613,7 @@ class Gestock
         }
     }
 
-    public function getFirstPreviousOrdersProducts($idUser)
+    public function getFirstPreviousOrders($idUser)
     {
         try
         {
@@ -631,6 +638,22 @@ class Gestock
             $this->ps_R_previousOrder_products->execute();
 
             return $this->ps_R_previousOrder_products->fetchAll();
+        }
+        catch (Exception $e)
+        {
+            error_log($e);
+            return Array();
+        }
+    }
+
+    public function getPreviousOrders($idUser)
+    {
+        try
+        {
+            $this->ps_R_previousOrders->bindParam(":idUser", $idUser);
+            $this->ps_R_previousOrders->execute();
+
+            return $this->ps_R_previousOrders->fetchAll();
         }
         catch (Exception $e)
         {

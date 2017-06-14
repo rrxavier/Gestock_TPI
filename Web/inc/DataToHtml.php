@@ -107,20 +107,20 @@ class DataToHtml
                 <td>
                     <a href="productDetails.php?id=' . $product['id'] . '"><img src="img/products/' . $product['imgName'] . '" alt=""></a>
                 </td>
-                <td class="cart_description">
+                <td>
                     <h4><a href="productDetails.php?id=' . $product['id'] . '"><b>' . $product['brand'] . '</b> ' . $product['name'] . '</a></h4>
                 </td>
                 <td class="cart_price">
                     <p>' . $product['price'] . '.-</p>
                 </td>
-                <td class="cart_quantity">
-                    <div class="row text-center">
-                        <a class="cart_quantity_up col-sm-2" href="cart.php" onclick="addToCart(' . $product['id'] . ', false)"> + </a>
-                        <div class="col-sm-6">' . $product['cartQuantity'] . ' <b>(' . $product['stockQuantity'] . ')</b></div>
+                <td class="cart_quantity text-center">
+                    <div class="row">
+                        <a class="cart_quantity_up col-sm-2 col-sm-offset-2" href="cart.php" onclick="addToCart(' . $product['id'] . ', false)"> + </a>
+                        <div class="col-sm-4">' . $product['cartQuantity'] . ' <b>(' . $product['stockQuantity'] . ')</b></div>
                         <a class="cart_quantity_down col-sm-2" href="cart.php" onclick="addToCart(' . $product['id'] . ', false, -1)"> - </a>
                     </div>
                 </td>
-                <td class="cart_total">
+                <td class="cart_total text-center">
                     <p class="cart_total_price">' . $product['cartQuantity'] * $product['price'] . '.-</p>
                 </td>
                 <td class="cart_delete">
@@ -129,7 +129,7 @@ class DataToHtml
             </tr>';
             $total += $product['cartQuantity'] * $product['price'];
         }
-        $htmlToShow .= '<tr><td></td><td></td><td></td><td></td><td class="cart_total"><p class="cart_total_price">' . $total . '.-</p></td></tr>';
+        $htmlToShow .= '<tr><td></td><td></td><td></td><td></td><td class="cart_total"><p class="cart_total_price text-center">' . $total . '.-</p></td></tr>';
         $htmlToShow .= '<tr><td colspan="6" class="text-center"><a href="passOrder.php" class="btn btn-default btnOrder"><h4>Order</h4></a></td></tr>';
 
         return $htmlToShow;
@@ -145,7 +145,7 @@ class DataToHtml
         $htmlToShow = "";
         $htmlToShow .= '<table>';
         foreach(Gestock::getInstance()->getFirstCartProducts($idUser) as $product)
-            $htmlToShow .= '<tr><td class="col-sm-2"><img src="img/products/' . $product['imgName'] . '"></td><td class="col-sm-6"><b>' . $product['brand'] . '</b> ' . $product['name'] . '</td><td class="cart_price col-sm-3"><p>' . $product['price'] . '</p></td></tr>';
+            $htmlToShow .= '<tr><td class="col-sm-2"><img src="img/products/' . $product['imgName'] . '"></td><td class="col-sm-6"><b>' . $product['brand'] . '</b> ' . $product['name'] . '</td><td class="cart_price col-sm-3"><p>' . $product['price'] . '.-</p></td></tr>';
         $htmlToShow .= '</table>';
         $htmlToShow .= '<div class="text-center"><a href="cart.php">Go to cart</a></div>';
 
@@ -156,16 +156,19 @@ class DataToHtml
     {
         $htmlToShow = "";
         $htmlToShow .= '<table>';
-        foreach(Gestock::getInstance()->getFirstPreviousOrdersProducts($idUser) as $order)
-            $htmlToShow .= '<tr><td class="col-sm-9 text-center"><b>' . $order['dateOrder'] . '</b></td><td><a href="previousOrderDetail.php?id=' . $order['id'] . '">Check details</a></td></tr>';
+        foreach(Gestock::getInstance()->getFirstPreviousOrders($idUser) as $order)
+            $htmlToShow .= '<tr><td class="col-sm-9 text-center"><b>' . $order['dateOrder'] . '</b></td><td><a href="previousOrderDetails.php?id=' . $order['id'] . '">Check details</a></td></tr>';
         $htmlToShow .= '</table>';
-        $htmlToShow .= '<div class="text-center"><a href="cart.php">Get the full list</a></div>';
+        $htmlToShow .= '<div class="text-center"><a href="previousOrders.php">Get the full list</a></div>';
 
         return $htmlToShow;
     }
 
     static public function PreviousOrderProductsToHTML($idUser)
     {
+        $products = Gestock::getInstance()->getPreviousOrderProducts($_SESSION['user']['id'], $_GET['id']);
+        if(count($products) == 0)
+            header('Location: index.php');
 
         $htmlToShow = "";
         $total = 0;
@@ -196,6 +199,14 @@ class DataToHtml
             $total += $product['cartQuantity'] * $product['price'];
         }
         $htmlToShow .= '<tr><td></td><td></td><td></td><td></td><td></td><td class="cart_total"><p class="cart_total_price text-center">' . $total . '.-</p></td></tr>';   
+        return $htmlToShow;
+    }
+
+    static public function PreviousOrdersToHTML($idUser)
+    {
+        $htmlToShow = '';
+        foreach(Gestock::getInstance()->getPreviousOrders($_SESSION['user']['id']) as $order)
+            $htmlToShow .= '<tr><td class="col-sm-6 text-center"><h3>' . $order['dateOrder'] . '</h3></td><td class="col-sm-6 text-center"><a href="previousOrderDetails.php?id=' . $order['id'] . '">Check details</a></td></tr>';
         return $htmlToShow;
     }
 }

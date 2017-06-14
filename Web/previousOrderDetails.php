@@ -4,10 +4,6 @@ require_once 'inc/DataToHtml.php';
 
 if(!isset($_SESSION['user']))
     header('Location: login.php');
-
-$products = Gestock::getInstance()->getPreviousOrderProducts($_SESSION['user']['id'], $_GET['id']);
-if(count($products) == 0)
-    header('Location: index.php');
 ?>
 <section id="cart_items">
     <div class="container">
@@ -16,12 +12,12 @@ if(count($products) == 0)
             <table class="table table-condensed">
                 <thead>
                     <tr class="cart_menu">
-                        <td class="image">Item</td>
-                        <td class="description">Name</td>
+                        <td class="">Item</td>
+                        <td class="">Name</td>
                         <td class=""></td>
-                        <td class="price">Price</td>
-                        <td class="quantity">Quantity</td>
-                        <td class="total text-center">Total</td>
+                        <td class="">Price</td>
+                        <td class="">Quantity</td>
+                        <td class="text-center">Total</td>
                         <td></td>
                     </tr>
                 </thead>

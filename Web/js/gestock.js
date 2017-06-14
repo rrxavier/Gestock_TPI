@@ -1,9 +1,18 @@
+timeoutId = -1;
+
 function addPopup(msg)
 {
-    $('body').append('<div class="popup"><div class="text-center"><h2>' + msg + '</h2></div></div>');
+    if(!$('.popup').length)
+        $('body').append('<div class="popup"><div class="text-center"><h2>' + msg + '</h2></div></div>');
+    else
+    {
+        clearTimeout(timeoutId);
+        $('.popup').html('<div class="text-center"><h2>' + msg + '</h2></div>');
+        $('.popup').hide();
+    }
 
     $(".popup").slideDown();
-    setTimeout(function() {
+    timeoutId = setTimeout(function() {
         $(".popup").slideUp();
     }, 2000);
 }

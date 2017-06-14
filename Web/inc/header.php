@@ -34,9 +34,21 @@ session_start();
 					<div class="col-sm-6">
 						<div class="shop-menu pull-center">
 							<ul class="nav navbar-nav">
-								<li><a href="#"><i class="fa fa-user"></i>Account</a></li>
-								<li><a href="cart.php"><i class="fa fa-shopping-cart"></i>Cart</a></li>
-								<li><a href="login.php"><i class="fa fa-lock"></i>Login</a></li>
+							<?php
+								$menu = '';
+								if(isset($_SESSION['user']))
+								{
+									$menu .= '<li><a href="account.php"><i class="fa fa-user"></i>' . $_SESSION['user']['username'] . '</a></li>';
+									$menu .= '<li><a href="cart.php"><i class="fa fa-shopping-cart"></i>Cart</a></li>';
+									$menu .= '<li><a href="logout.php"><i class="glyphicon glyphicon-remove"></i>Logout</a></li>';
+								}
+								else
+								{
+									$menu .= '<li><a href="cart.php"><i class="fa fa-shopping-cart"></i>Cart</a></li>';
+									$menu .= '<li><a href="login.php"><i class="fa fa-lock"></i>Login</a></li>';
+								}
+								echo $menu;
+							?>
 							</ul>
 						</div>
 					</div>

@@ -3,7 +3,7 @@ require_once 'inc/header.php';
 require_once 'inc/DataToHtml.php';
 
 if(!isset($_SESSION['user']))
-    header('Location: login.php');
+    header('Location: login.php?msg=Login first !');
 $msg = FILTER_INPUT(INPUT_GET, "msg");
 ?>
 <section id="cart_items">
@@ -12,12 +12,12 @@ $msg = FILTER_INPUT(INPUT_GET, "msg");
             <table class="table table-condensed">
                 <thead>
                     <tr class="cart_menu">
-                        <td class="image">Item</td>
-                        <td class="description">Name</td>
-                        <td class="price">Price</td>
-                        <td class="quantity">Quantity</td>
-                        <td class="total">Total</td>
-                        <td></td>
+                        <td class="image col-sm-1">Item</td>
+                        <td class="col-sm-3">Name</td>
+                        <td class="price col-sm-2">Price</td>
+                        <td class="quantity text-center col-sm-3">Quantity</td>
+                        <td class="total text-center col-sm-2">Total</td>
+                        <td class="col-sm-1"></td>
                     </tr>
                 </thead>
                 <tbody>
