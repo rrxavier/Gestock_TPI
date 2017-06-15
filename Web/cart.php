@@ -9,6 +9,7 @@ $msg = FILTER_INPUT(INPUT_GET, "msg");
 <section id="cart_items">
     <div class="container">
         <div class="table-responsive cart_info m-t-5">
+        <div class="text-center"><h1>Cart</h1></div>
             <table class="table table-condensed">
                 <thead>
                     <tr class="cart_menu">

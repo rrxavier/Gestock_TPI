@@ -42,6 +42,9 @@ class DataToHtml
      */
     static public function ProductsToHtml($products)
     {   
+        if(count($products) == 0)
+            header('Location: index.php');
+
         $htmlToShow = "";
         foreach($products as $product)
         {
@@ -83,9 +86,6 @@ class DataToHtml
         else
             $htmlToShow .= '<li class="disabled"><span aria-label="Next">&raquo;</span></li></ul>';
 
-        if($page > $nbPages)
-            header('Location: index.php');
-
         return $htmlToShow;
     }
 
@@ -115,9 +115,9 @@ class DataToHtml
                 </td>
                 <td class="cart_quantity text-center">
                     <div class="row">
-                        <a class="cart_quantity_up col-sm-2 col-sm-offset-2" href="cart.php" onclick="addToCart(' . $product['id'] . ', false)"> + </a>
+                        <a class="cart_quantity_up col-sm-2 col-sm-offset-2" href="cart.php" onclick="addToCartFromCart(' . $product['id'] . ')"> + </a>
                         <div class="col-sm-4">' . $product['cartQuantity'] . ' <b>(' . $product['stockQuantity'] . ')</b></div>
-                        <a class="cart_quantity_down col-sm-2" href="cart.php" onclick="addToCart(' . $product['id'] . ', false, -1)"> - </a>
+                        <a class="cart_quantity_down col-sm-2" href="cart.php" onclick="addToCartFromCart(' . $product['id'] . ', -1)"> - </a>
                     </div>
                 </td>
                 <td class="cart_total text-center">

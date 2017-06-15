@@ -10,9 +10,8 @@ $email = $_POST['userEmail'];
 $money = $_POST['userMoney'];
 $idUser = $_GET['id'];
 
-echo $idUser;
-/*if(!$idUser)
-    header('Location: adminUsers.php');*/
+if(!$idUser)
+    header('Location: adminUsers.php');
 
 
 $result = Gestock::getInstance()->modifyUser($idUser, $username, $email, $money);

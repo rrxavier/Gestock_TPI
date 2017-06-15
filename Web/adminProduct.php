@@ -31,8 +31,12 @@ if($mode)
 <section id="cart_items">
     <div class="container">
         <div class="table-responsive cart_info m-t-5">
+        <div class="text-center"><h1><?php echo ($mode == "modify" ? "Modify" : "Add"); ?> product</h1></div>
         <form <?php echo 'action="' . ($mode == "modify" ? "modifyProduct.php?id=" . $idProduct : "addProduct.php") . '"' ?> method="POST" enctype="multipart/form-data">
             <table class="table table-condensed">
+            <thead>
+                <th class="col-sm-4"></th><th class="col-sm-4"></th><th class="col-sm-4"></th>
+            </thead>
             <div class="row">
                 <tbody>
                     <tr><td>Name: </td><td><input required type="text" name="productName" id="productName" value=<?php echo '"' . ($mode == "modify" ? $product['name'] : "") . '"'; ?>></td></tr>

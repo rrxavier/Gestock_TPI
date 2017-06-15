@@ -17,11 +17,12 @@ else
 <section id="cart_items">
     <div class="container">
         <div class="table-responsive cart_info m-t-5">
-        <div class="row">
-            <form action="adminProducts.php" method="POST" class="form-inline col-sm-12 pull-center"><div class="search_box col-sm-12 input-group input-group-lg"><input class="text-center form-control" name="searchAdmin" type="text" placeholder="SEARCH BY NAME..."></div></form>            
-        </div>
+        <div class="text-center"><h1>All products</h1></div>
         <div class="row text-center">
             <a href="adminProduct.php?mode=add"><h2>Ajouter un produit</h2></a>
+        </div>
+        <div class="row">
+            <form action="adminProducts.php" method="POST" class="form-inline col-sm-12 pull-center"><div class="search_box col-sm-12 input-group input-group-lg"><input class="text-center form-control" name="searchAdmin" type="text" placeholder="SEARCH BY NAME..."></div></form>            
         </div>
             <table class="table table-condensed">
                 <thead>

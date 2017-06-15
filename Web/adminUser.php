@@ -13,6 +13,7 @@ $user = $user[0];
 <section id="cart_items">
     <div class="container">
         <div class="table-responsive cart_info m-t-5">
+        <div class="text-center"><h1>Modify user</h1></div>
         <form action="modifyUser.php?id=<?php echo $user['id']; ?>" method="POST">
         <table class="table table-condensed">
             <thead>

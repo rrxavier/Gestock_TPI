@@ -1,6 +1,7 @@
 <?php 
 	require_once 'inc/header.php';
 	require_once 'inc/DataToHtml.php';
+	ob_start();
 
     $idCategory = -1;
     if(filter_input(INPUT_GET, "id", FILTER_VALIDATE_INT))

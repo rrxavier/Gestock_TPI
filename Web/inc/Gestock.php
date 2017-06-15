@@ -63,6 +63,9 @@ class Gestock
 
     private $ps_R_users;
     private $ps_U_user;
+    private $ps_D_user;
+
+    private $ps_R_products_low;
 
     /**
      * Constructor of the object. Initialises the PDO object and prepares the SQL statements.
@@ -300,6 +303,12 @@ class Gestock
                                                         users.money = :money 
                                                         WHERE users.id = :idUser');
             $this->ps_U_users->setFetchMode(PDO::FETCH_ASSOC);
+
+            $this->ps_D_users = $this->dbc->prepare('DELETE FROM users WHERE users.id = :idUser');
+            $this->ps_D_users->setFetchMode(PDO::FETCH_ASSOC);
+
+            $this->ps_R_products_low = $this->dbc->prepare('SELECT * FROM products_with_info AS p WHERE p.stockQuantity <= p.alertQuantity');
+            $this->ps_R_products_low->setFetchMode(PDO::FETCH_ASSOC);  
         }
         catch (Exception $e)
         {
@@ -860,6 +869,35 @@ class Gestock
             error_log($e);
             return $e;
         }
+    }
+
+    public function deleteUser($idUser)
+    {
+       try
+        {
+            $this->ps_D_users->bindParam('idUser', $idUser);
+            $this->ps_D_users->execute();
+            return true;
+        }
+        catch(Excetpion $e)
+        {
+            error_log($e);
+            return $e;
+        } 
+    }
+
+    public function getLowQuantityProducts()
+    {
+        try
+        {
+            $this->ps_R_products_low->execute();
+            return $this->ps_R_products_low->fetchAll();
+        }
+        catch(Excetpion $e)
+        {
+            error_log($e);
+            return $e;
+        } 
     }
 }
 

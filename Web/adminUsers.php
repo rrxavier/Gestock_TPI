@@ -8,9 +8,7 @@ if(!isset($_SESSION['user']) || $_SESSION['user']['idRole_fk'] == 1)
 <section id="cart_items">
     <div class="container">
         <div class="table-responsive cart_info m-t-5">
-        <div class="row text-center">
-            <a href="adminProduct.php?mode=add"><h2>Ajouter un produit</h2></a>
-        </div>
+        <div class="text-center"><h1>All users</h1></div>
             <table class="table table-condensed">
                 <thead>
                     <tr class="cart_menu">

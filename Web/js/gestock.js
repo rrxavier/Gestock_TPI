@@ -36,7 +36,24 @@ function addToCart(idProduct, returnPopup = true, quantity = 1)
                     addPopup("Error, try again.");
             },
             error: function(jqXHR) {
-                // alert(jqXHR.responseText + "" + jqXHR.status);
+                 alert(jqXHR.responseText + "" + jqXHR.status);
+            }
+    });
+}
+
+function addToCartFromCart(idProduct, quantity = 1)
+{
+    $.ajax({
+            method: 'POST',
+            url: 'addToCart.php',
+            data: {'idProduct': idProduct, 'quantity': quantity},
+            dataType: 'html',
+            async: false,
+            success: function (data) {
+                
+            },
+            error: function(jqXHR) {
+                 //alert(jqXHR.responseText + "" + jqXHR.status);
             }
     });
 }
