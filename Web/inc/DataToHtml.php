@@ -209,6 +209,38 @@ class DataToHtml
             $htmlToShow .= '<tr><td class="col-sm-6 text-center"><h3>' . $order['dateOrder'] . '</h3></td><td class="col-sm-6 text-center"><a href="previousOrderDetails.php?id=' . $order['id'] . '">Check details</a></td></tr>';
         return $htmlToShow;
     }
+
+    static public function AdminProductsToHTML($page, $searchToken = "")
+    {
+        $products = Gestock::getInstance()->getProductsLIKE($page * NUMBER_PRODUCTS_SHOWN, $searchToken);
+        $htmlToShow = "";
+        foreach($products as $product)
+        {
+            $htmlToShow .=  '<tr>
+                <td class="">
+                    <a href="productDetails.php?id=' . $product['id'] . '"><img src="img/products/' . $product['imgName'] . '" alt=""></a>
+                </td>
+                <td class="cart_description">
+                    <h4><a href="productDetails.php?id=' . $product['id'] . '"><b>' . $product['brand'] . '</b> ' . $product['name'] . '</a></h4>
+                </td>
+                <td class="col-sm-2">
+                    <h4>' . $product['category'] . '</h4>
+                </td>
+                <td class="cart_price">
+                    <p>' . $product['price'] . '.-</p>
+                </td>
+                <td class="cart_quantity">
+                    <div class="row text-center">
+                        <div>' . $product['stockQuantity'] . '</div>
+                    </div>
+                </td>
+                <td class="cart_total text-center">
+                    <p class="cart_total_price"><div class="col-sm-6"><a href="adminProduct.php?id=' . $product['id'] . '&mode=modify">Modify</a></div><div class="col-sm-6"><a href="deleteProduct.php?id=' . $product['id'] . '">Delete</a></div></p>
+                </td>
+            </tr>';
+        }
+        return $htmlToShow;
+    }
 }
 
 ?>

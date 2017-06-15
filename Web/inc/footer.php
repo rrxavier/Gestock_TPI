@@ -1,8 +1,8 @@
 		<div class="navbar-fixed-bottom">
 			<div class="container">
 				<div class="row">
-					<p class="pull-left">Copyright © 2017 Gestock Inc. Tous droits réservés. <b>ABOUT (À FAIRE)</b></p>
-					<p class="pull-right">Conçu par <span><a target="_blank" href="http://www.themeum.com">Themeum</a></span> et modifié par Ricardo Nunes de Oliveira.</p>
+					<p class="pull-left">Copyright © 2017 Gestock Inc. All rights reserved.</p>
+					<p class="pull-right">Theme made by <span><a target="_blank" href="http://www.themeum.com">Themeum</a></span> and modified by Ricardo Nunes de Oliveira.</p>
 				</div>
 			</div>
 		</div>

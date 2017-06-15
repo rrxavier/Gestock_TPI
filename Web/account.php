@@ -35,12 +35,6 @@ $_SESSION['user'] = Gestock::getInstance()->getUserInfo($_SESSION['user']['id'])
                         <div class="col-sm-8"><?php echo $_SESSION['user']['money']; ?>.-</div>
                     </div>
                 </div>
-                <div class="row">
-                    <div clasS="col-sm-5 col-sm-offset-1">
-                        <strong class="col-sm-4">Password :</strong>
-                        <div class="col-sm-8"><b>CHANGE PASSWORD LINK</b></div>
-                    </div>
-                </div>
             </div>
         </div>
         <div class="row">
@@ -61,6 +55,29 @@ $_SESSION['user'] = Gestock::getInstance()->getUserInfo($_SESSION['user']['id'])
                 </div>
             </div>
         </div>
+        <?php
+            if($_SESSION['user']['idRole_fk'] == 2)
+            {
+                echo '<div class="row">
+                        <div class="accountBlock">
+                            <div class="text-center">
+                                <h1>Administration</h1>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-4 text-center">
+                                    <a href="adminProducts.php"><h3>Manage Products</h3></a>
+                                </div>
+                                <div class="col-sm-4 text-center">
+                                    <a href="adminUsers.php"><h3>Manage Users</h3></a>
+                                </div>
+                                <div class="col-sm-4 text-center">
+                                    <a href="adminLowQuantity.php"><h3>Low quantity products</h3></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>';
+            }
+        ?>
     </div>
 </section>
 

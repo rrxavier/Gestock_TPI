@@ -52,7 +52,17 @@ class Gestock
 
     private $ps_R_previousOrders_limit;
     private $ps_R_previousOrder_products;
-    private $ps_R_previousOrders;    
+    private $ps_R_previousOrders;  
+
+    private $ps_R_products_LIKE;
+    private $ps_R_stocks;
+    private $ps_C_product;
+    private $ps_C_stocks_has_product;
+    private $ps_D_product;
+    private $ps_U_product;
+
+    private $ps_R_users;
+    private $ps_U_user;
 
     /**
      * Constructor of the object. Initialises the PDO object and prepares the SQL statements.
@@ -77,12 +87,16 @@ class Gestock
 
             // Selects the next 9(NUMBER_PRODUCTS_SHOWN) products.
             $limit = NUMBER_PRODUCTS_SHOWN;
-            $this->ps_R_products = $this->dbc->prepare("SELECT SQL_CALC_FOUND_ROWS products.* FROM products LIMIT :limit OFFSET :offset");
+            $this->ps_R_products = $this->dbc->prepare("SELECT SQL_CALC_FOUND_ROWS products_with_info.* FROM products_with_info LIMIT :limit OFFSET :offset");
             $this->ps_R_products->bindParam(":limit", $limit, PDO::PARAM_INT);
             $this->ps_R_products->setFetchMode(PDO::FETCH_ASSOC);
 
             // Selects all the info of a certain product.
-            $this->ps_R_product_by_id = $this->dbc->prepare("SELECT products_with_info.* FROM products_with_info WHERE products_with_info.id = :idProduct");
+            $this->ps_R_product_by_id = $this->dbc->prepare("SELECT products_with_info.*, stocks.id AS idStock, stocks.shelf AS shelf
+                                                                FROM products_with_info, stocks_has_product, stocks
+                                                                WHERE products_with_info.id = :idProduct
+                                                                AND stocks_has_product.idProduct_fk = products_with_info.id
+                                                                AND stocks.id = stocks_has_product.idStock_fk");
             $this->ps_R_product_by_id->setFetchMode(PDO::FETCH_ASSOC);
 
             // Selects the next 9(NUMBER_PRODUCTS_SHOWN) products of a given category.
@@ -241,7 +255,51 @@ class Gestock
                                                                     WHERE carts.idUser_fk = :idUser 
                                                                     AND carts.dateOrder IS NOT null
                                                                     ORDER BY carts.id DESC");
-            $this->ps_R_previousOrders->setFetchMode(PDO::FETCH_ASSOC); 
+            $this->ps_R_previousOrders->setFetchMode(PDO::FETCH_ASSOC);
+            
+            // Selects the next 9(NUMBER_PRODUCTS_SHOWN) products.
+            $this->ps_R_products_LIKE = $this->dbc->prepare("SELECT SQL_CALC_FOUND_ROWS products_with_info.* FROM products_with_info WHERE products_with_info.name LIKE :searchToken LIMIT :limit OFFSET :offset");
+            $this->ps_R_products_LIKE->bindParam(":limit", $limit, PDO::PARAM_INT);
+            $this->ps_R_products_LIKE->setFetchMode(PDO::FETCH_ASSOC);
+
+            $this->ps_R_stocks = $this->dbc->prepare("SELECT * FROM stocks");
+            $this->ps_R_stocks->setFetchMode(PDO::FETCH_ASSOC);
+    
+            $this->ps_C_product = $this->dbc->prepare("INSERT INTO products VALUES (null, :name, :brand, :price, 5, :imgName, :idCategory)");
+            $this->ps_C_product->setFetchMode(PDO::FETCH_ASSOC);
+
+            $this->ps_C_stocks_has_product = $this->dbc->prepare("INSERT INTO stocks_has_product VALUES (null, :idStock, LAST_INSERT_ID(), :quantity)");
+            $this->ps_C_stocks_has_product->setFetchMode(PDO::FETCH_ASSOC);
+
+            $this->ps_D_product = $this->dbc->prepare("DELETE FROM stocks_has_product WHERE stocks_has_product.idProduct_fk = :idProduct1;
+                                                       DELETE FROM products WHERE products.id = :idProduct2;");
+            $this->ps_D_product->setFetchMode(PDO::FETCH_ASSOC);
+
+            $this->ps_U_product = $this->dbc->prepare('UPDATE stocks_has_product, products
+                                                        SET stocks_has_product.idStock_fk = :idStock, 
+                                                        stocks_has_product.quantity = :quantity,
+                                                        products.name = :name,
+                                                        products.brand = :brand,
+                                                        products.price = :price,
+                                                        products.imgName = 
+                                                        CASE
+                                                        WHEN :imgName1 != "" THEN :imgName2
+                                                        ELSE products.imgName
+                                                        END,
+                                                        products.idCategory_fk = :idCategory
+                                                        WHERE products.id = :idProduct
+                                                        AND stocks_has_product.idProduct_fk = products.id');
+            $this->ps_U_product->setFetchMode(PDO::FETCH_ASSOC);
+
+            $this->ps_R_users = $this->dbc->prepare('SELECT * FROM users');
+            $this->ps_R_users->setFetchMode(PDO::FETCH_ASSOC);
+
+            $this->ps_U_users = $this->dbc->prepare('UPDATE users 
+                                                        SET users.username = :username, 
+                                                        users.email = :email, 
+                                                        users.money = :money 
+                                                        WHERE users.id = :idUser');
+            $this->ps_U_users->setFetchMode(PDO::FETCH_ASSOC);
         }
         catch (Exception $e)
         {
@@ -659,6 +717,148 @@ class Gestock
         {
             error_log($e);
             return Array();
+        }
+    }
+    
+    public function getProductsLIKE($offset, $searchToken)
+    {
+        try
+        {
+            $searchToken = "%" . $searchToken . "%";
+            $this->ps_R_products_LIKE->bindParam(":offset", $offset, PDO::PARAM_INT);
+            $this->ps_R_products_LIKE->bindParam(":searchToken", $searchToken);
+            $this->ps_R_products_LIKE->execute();
+            return $this->ps_R_products_LIKE->fetchAll();
+        }
+        catch (Exception $e)
+        {
+            error_log($e);
+            return Array();
+        }
+    }
+
+    public function getStocks()
+    {
+        try
+        {
+            $this->ps_R_stocks->execute();
+            return $this->ps_R_stocks->fetchAll();
+        }
+        catch (Exception $e)
+        {
+            error_log($e);
+            return Array();
+        }
+    }
+    
+    public function insertProduct($name, $brand, $price, $idCategory, $quantity, $imgName, $idStock)
+    {
+        try
+        {
+            $this->dbc->beginTransaction();
+
+            $this->ps_C_product->bindParam(':name', $name);
+            $this->ps_C_product->bindParam(':brand', $brand);
+            $this->ps_C_product->bindParam(':price', $price);
+            $this->ps_C_product->bindParam(':imgName', $imgName);
+            $this->ps_C_product->bindParam(':idCategory', $idCategory);
+            $this->ps_C_product->execute();
+
+            $this->ps_C_stocks_has_product->bindParam(':idStock', $idStock);
+            $this->ps_C_stocks_has_product->bindParam(':quantity', $quantity);
+            $this->ps_C_stocks_has_product->execute();
+
+            $this->dbc->commit();
+            return true;
+        }
+        catch (Exception $e)
+        {
+            $this->dbc->rollback();
+            error_log($e);
+            //echo $name, " ", $brand, " ", $price, " " . $idCategory, " ", $quantity, " ", $imgName, " ", $idStock;
+            return $e;
+        }
+    }
+
+    public function deleteProduct($idProduct)
+    {
+        try
+        {
+            $this->ps_D_product->bindParam(':idProduct1', $idProduct);
+            $this->ps_D_product->bindParam(':idProduct2', $idProduct);
+            $this->ps_D_product->execute();
+
+            return true;
+        }
+        catch (Exception $e)
+        {
+            error_log($e);
+            return $e;
+        }
+    }
+
+    public function modifyProduct($name, $brand, $price, $idCategory, $quantity, $imgName = "", $idStock, $idProduct)
+    {
+        try
+        {
+            $this->dbc->beginTransaction();
+
+            /*$this->ps_U_stocks_has_product->bindParam(':idStock', $idStock);
+            $this->ps_U_stocks_has_product->bindParam(':quantity', $quantity);
+            $this->ps_U_stocks_has_product->execute();*/
+
+            $this->ps_U_product->bindParam(':idStock', $idStock);
+            $this->ps_U_product->bindParam(':quantity', $quantity);
+            $this->ps_U_product->bindParam(':name', $name);
+            $this->ps_U_product->bindParam(':brand', $brand);
+            $this->ps_U_product->bindParam(':price', $price);
+            $this->ps_U_product->bindParam(':imgName1', $imgName);
+            $this->ps_U_product->bindParam(':imgName2', $imgName);
+            $this->ps_U_product->bindParam(':idCategory', $idCategory);
+            $this->ps_U_product->bindParam(':idProduct', $idProduct);
+            $this->ps_U_product->execute();
+
+            $this->dbc->commit();
+            return true;
+        }
+        catch (Exception $e)
+        {
+            $this->dbc->rollback();
+            error_log($e);
+            //echo $name, " ", $brand, " ", $price, " " . $idCategory, " ", $quantity, " ", $imgName, " ", $idStock;
+            return $e;
+        }
+    }
+
+    public function getUsers()
+    {
+        try
+        {
+            $this->ps_R_users->execute();
+            return $this->ps_R_users->fetchAll();
+        }
+        catch (Exception $e)
+        {
+            error_log($e);
+            return Array();
+        }        
+    }
+
+    public function modifyUser($idUser, $username, $email, $money)
+    {
+        try
+        {
+            $this->ps_U_users->bindParam('idUser', $idUser);
+            $this->ps_U_users->bindParam('username', $username);
+            $this->ps_U_users->bindParam('email', $email);
+            $this->ps_U_users->bindParam('money', $money);
+            $this->ps_U_users->execute();
+            return true;
+        }
+        catch(Excetpion $e)
+        {
+            error_log($e);
+            return $e;
         }
     }
 }
