@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Client :  127.0.0.1
--- Généré le :  Jeu 08 Juin 2017 à 13:43
+-- Généré le :  Ven 16 Juin 2017 à 13:30
 -- Version du serveur :  5.6.15-log
 -- Version de PHP :  5.5.8
 
@@ -19,6 +19,8 @@ SET time_zone = "+00:00";
 --
 -- Base de données :  `gestockdb`
 --
+CREATE DATABASE IF NOT EXISTS `gestockdb` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
+USE `gestockdb`;
 
 -- --------------------------------------------------------
 
@@ -42,14 +44,14 @@ CREATE TABLE IF NOT EXISTS `carts` (
 --
 
 CREATE TABLE IF NOT EXISTS `carts_has_stocks` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `idCart_fk` int(11) NOT NULL,
   `idStock_has_product_fk` int(11) NOT NULL,
   `quantity` int(11) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `idStock_carts_has_products_idx` (`idStock_has_product_fk`),
+  KEY `idStock_has_product_cart_has_stocks_idx` (`idStock_has_product_fk`),
   KEY `idCart_carts_has_products` (`idCart_fk`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -95,8 +97,9 @@ CREATE TABLE IF NOT EXISTS `products` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `idProduct_UNIQUE` (`id`),
   UNIQUE KEY `name_UNIQUE` (`name`),
-  KEY `idCategory_products_idx` (`idCategory_fk`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=25 ;
+  KEY `idCategory_products_idx` (`idCategory_fk`),
+  FULLTEXT KEY `name` (`name`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=47 ;
 
 --
 -- Contenu de la table `products`
@@ -121,19 +124,19 @@ INSERT INTO `products` (`id`, `name`, `brand`, `price`, `alertQuantity`, `imgNam
 (16, 'STRIX Z270F GAMING', 'Asus', 196, 5, 'asusSTRIXZ270GAMING.jpg', 3),
 (17, 'Z170XP-SLI', 'Gigabyte', 169, 5, 'gigabyteZ170XP-SLI.jpg', 3),
 (18, 'Z270 Gaming Pro Carbon', 'MSI', 183, 5, 'msiZ270GamingProCarbon.jpg', 3),
-(19, 'H100i v2', 'Corsair', 139, 5, 'corsairH100iv2.jpg', 2),
+(19, 'H100i V2', 'Corsair', 139, 5, 'corsairH100iv2.jpg', 2),
 (20, 'Dark Rock 3', 'Be Quiet !', 79, 5, 'beQuietDarkRock3.jpg', 2),
 (21, 'Dark Rock 3 PRO', 'Be Quiet !', 89, 5, 'beQuietDarkRockPRO3.jpg', 2),
 (22, 'Core i7 7700K BOX 4.2GHz', 'Intel', 365, 5, 'intelCorei77700KBOX.jpg', 1),
 (23, 'Core i5 7600K BOX 3.8GHz', 'Intel', 256, 5, 'intelCorei57600KBOX.jpg', 1),
-(24, 'Pentium G4560 3.5GHz', 'Intel', 74.6, 5, 'intelPentiumG4560.jpg', 1);
+(24, 'Pentium G4560 3.5GHz', 'Intel', 73.6, 5, 'intelPentiumG4560.jpg', 1);
 
 -- --------------------------------------------------------
 
 --
--- Doublure de structure pour la vue `products_with_category`
+-- Doublure de structure pour la vue `products_with_info`
 --
-CREATE TABLE IF NOT EXISTS `products_with_category` (
+CREATE TABLE IF NOT EXISTS `products_with_info` (
 `id` int(11)
 ,`name` varchar(50)
 ,`brand` varchar(30)
@@ -141,6 +144,7 @@ CREATE TABLE IF NOT EXISTS `products_with_category` (
 ,`alertQuantity` int(11)
 ,`imgName` varchar(50)
 ,`category` varchar(45)
+,`stockQuantity` int(11)
 );
 -- --------------------------------------------------------
 
@@ -195,19 +199,67 @@ INSERT INTO `stocks` (`id`, `shelf`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `stocks_has_product`
+--
+
+CREATE TABLE IF NOT EXISTS `stocks_has_product` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `idStock_fk` int(11) NOT NULL,
+  `idProduct_fk` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idStock_UNIQUE` (`id`),
+  KEY `idStock_stocks_has_product_idx` (`idStock_fk`),
+  KEY `idProduct_stocks_has_product_idx` (`idProduct_fk`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=32 ;
+
+--
+-- Contenu de la table `stocks_has_product`
+--
+
+INSERT INTO `stocks_has_product` (`id`, `idStock_fk`, `idProduct_fk`, `quantity`) VALUES
+(1, 1, 1, 10),
+(2, 1, 2, 10),
+(3, 1, 3, 10),
+(4, 2, 4, 10),
+(5, 2, 5, 10),
+(6, 2, 6, 10),
+(7, 3, 7, 10),
+(8, 3, 8, 10),
+(9, 3, 9, 10),
+(10, 4, 10, 10),
+(11, 4, 11, 10),
+(12, 4, 12, 10),
+(13, 5, 13, 10),
+(14, 5, 14, 10),
+(15, 5, 15, 10),
+(16, 6, 16, 10),
+(17, 9, 17, 10),
+(18, 6, 18, 10),
+(19, 7, 19, 10),
+(20, 7, 20, 10),
+(21, 7, 21, 10),
+(22, 8, 22, 10),
+(23, 8, 23, 10),
+(24, 8, 24, 10);
+
+-- --------------------------------------------------------
+
+--
 -- Structure de la table `users`
 --
 
 CREATE TABLE IF NOT EXISTS `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `username` varchar(45) NOT NULL,
+  `username` varchar(45) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
   `email` varchar(75) NOT NULL,
-  `password` char(40) NOT NULL,
+  `password` char(40) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
   `money` double NOT NULL,
   `idRole_fk` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   UNIQUE KEY `username_UNIQUE` (`username`),
+  UNIQUE KEY `email` (`email`),
   KEY `idRole_users_idx` (`idRole_fk`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=4 ;
 
@@ -223,11 +275,11 @@ INSERT INTO `users` (`id`, `username`, `email`, `password`, `money`, `idRole_fk`
 -- --------------------------------------------------------
 
 --
--- Structure de la vue `products_with_category`
+-- Structure de la vue `products_with_info`
 --
-DROP TABLE IF EXISTS `products_with_category`;
+DROP TABLE IF EXISTS `products_with_info`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `products_with_category` AS select `products`.`id` AS `id`,`products`.`name` AS `name`,`products`.`brand` AS `brand`,`products`.`price` AS `price`,`products`.`alertQuantity` AS `alertQuantity`,`products`.`imgName` AS `imgName`,`categories`.`name` AS `category` from (`products` join `categories`) where (`products`.`idCategory_fk` = `categories`.`id`);
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `products_with_info` AS select `products`.`id` AS `id`,`products`.`name` AS `name`,`products`.`brand` AS `brand`,`products`.`price` AS `price`,`products`.`alertQuantity` AS `alertQuantity`,`products`.`imgName` AS `imgName`,`categories`.`name` AS `category`,`stocks_has_product`.`quantity` AS `stockQuantity` from ((`products` join `categories`) join `stocks_has_product`) where ((`products`.`idCategory_fk` = `categories`.`id`) and (`stocks_has_product`.`idProduct_fk` = `products`.`id`));
 
 --
 -- Contraintes pour les tables exportées
@@ -237,14 +289,14 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 -- Contraintes pour la table `carts`
 --
 ALTER TABLE `carts`
-  ADD CONSTRAINT `idUser_carts` FOREIGN KEY (`idUser_fk`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+  ADD CONSTRAINT `idUser_carts` FOREIGN KEY (`idUser_fk`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Contraintes pour la table `carts_has_stocks`
 --
 ALTER TABLE `carts_has_stocks`
-  ADD CONSTRAINT `idCart_carts_has_products` FOREIGN KEY (`idCart_fk`) REFERENCES `carts` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  ADD CONSTRAINT `idStock_carts_has_products` FOREIGN KEY (`idStock_has_product_fk`) REFERENCES `stocks_has_products` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+  ADD CONSTRAINT `idCart_carts_has_products` FOREIGN KEY (`idCart_fk`) REFERENCES `carts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `idStock_has_product_cart_has_stocks` FOREIGN KEY (`idStock_has_product_fk`) REFERENCES `stocks_has_product` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
 -- Contraintes pour la table `products`
@@ -253,11 +305,18 @@ ALTER TABLE `products`
   ADD CONSTRAINT `idCategory_products` FOREIGN KEY (`idCategory_fk`) REFERENCES `categories` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
+-- Contraintes pour la table `stocks_has_product`
+--
+ALTER TABLE `stocks_has_product`
+  ADD CONSTRAINT `idProduct_stocks_has_product` FOREIGN KEY (`idProduct_fk`) REFERENCES `products` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `idStock_stocks_has_product` FOREIGN KEY (`idStock_fk`) REFERENCES `stocks` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+--
 -- Contraintes pour la table `users`
 --
 ALTER TABLE `users`
   ADD CONSTRAINT `idRole_users` FOREIGN KEY (`idRole_fk`) REFERENCES `roles` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
-
+  
 CREATE USER 'gestockAdminDB'@'127.0.0.1' IDENTIFIED BY 'gestockTPI2017';
 GRANT ALL PRIVILEGES ON `GestockDB`.* TO 'gestockAdminDB';
 

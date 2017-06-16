@@ -76,9 +76,9 @@ class Gestock
         { 
             // PDO initialisation
             $this->dbc = new PDO('mysql:host=' . HOST . ';dbname=' . DBNAME, USER, PASSWORD, 
-                            array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8",
-                                PDO::ATTR_PERSISTENT => true,
-                                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
+                                    array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8",
+                                    PDO::ATTR_PERSISTENT => true,
+                                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
 
             // Gets the value processed by the SQL_CALC_FOUND_ROWS. Used to return the total number of items of a given category.
             $this->ps_nbProducts = $this->dbc->prepare("SELECT FOUND_ROWS() AS NB_ROWS");
@@ -344,8 +344,17 @@ class Gestock
      */
     public function getCategories()
     {
-        $this->ps_R_categories->execute();
-        return $this->ps_R_categories->fetchAll();
+        try
+        {
+            $this->ps_R_categories->execute();
+            return $this->ps_R_categories->fetchAll();
+        }
+        catch (Exception $e)
+        {
+            error_log($e);
+            echo 'Website unavailable, please try again later.';
+            die();
+        }
     }
 
     /**
@@ -468,7 +477,7 @@ class Gestock
     }
 
     /**
-     * Get the current cart of a given user. If he doesn't have one, creates it.
+     * Get the current cart of a given user. If he doesn't have one, creates one.
      * @param type $idUser  The id of the owner of the cart.
      * @return \Exception   The cart if the script successfully executed, FALSE if an error occurred.
      */
@@ -515,10 +524,9 @@ class Gestock
             $this->ps_R_carts_has_stocks_oneProduct->execute();
             $existingLine = $this->ps_R_carts_has_stocks_oneProduct->fetchAll();
 
-
-            if(count($existingLine) == 1) // IF EXISTS : CHANGER QUANTITY
+            if(count($existingLine) == 1) // IF EXISTS : CHANGE QUANTITY
             {
-                if($quantity + $existingLine[0]['cartQuantity'] == 0)   // IF the user is DELETING and the quantity reaches 0 or less : DELETE THE ROW
+                if($quantity + $existingLine[0]['cartQuantity'] <= 0)   // IF the user is DELETING and the quantity reaches 0 or less : DELETE THE ROW
                     $this->deleteProductFromCart($idProduct, $idUser);
                 else    // ELSE : CHANGE QUANTITY
                 {
@@ -812,10 +820,6 @@ class Gestock
         {
             $this->dbc->beginTransaction();
 
-            /*$this->ps_U_stocks_has_product->bindParam(':idStock', $idStock);
-            $this->ps_U_stocks_has_product->bindParam(':quantity', $quantity);
-            $this->ps_U_stocks_has_product->execute();*/
-
             $this->ps_U_product->bindParam(':idStock', $idStock);
             $this->ps_U_product->bindParam(':quantity', $quantity);
             $this->ps_U_product->bindParam(':name', $name);
@@ -834,7 +838,6 @@ class Gestock
         {
             $this->dbc->rollback();
             error_log($e);
-            //echo $name, " ", $brand, " ", $price, " " . $idCategory, " ", $quantity, " ", $imgName, " ", $idStock;
             return $e;
         }
     }

@@ -19,7 +19,6 @@ if(!isset($_SESSION['user']))
 
 $result = Gestock::getInstance()->passOrder($_SESSION['user']['id']);
 
-print_r($result);
 if(is_bool($result))
 {
     if($result)
@@ -39,7 +38,4 @@ else
     if($result == 'NotEnoughMoney')
         header('Location: cart.php?msg=You do not have enough money !');
 }
-
-
-
 ?>

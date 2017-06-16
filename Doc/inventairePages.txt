@@ -1,14 +1,27 @@
-User :
+Affichage :
 	account.php
+	adminLowQuantity.php
+	adminProduct.php
+	adminProducts.php
+	adminUser.php
+	adminUsers.php
 	cart.php
 	category.php
 	index.php
 	login.php
+	previousOrderDetails.php
+	previousOrders.php
 	productDetails.php
 
 Scripts :
+	addProduct.php
 	addToCart.php
 	addUser.php
 	authentification.php
+	deleteProduct.php
 	deleteProductFromCart.php
+	deleteUser.php
+	logout.php
+	modifyProduct.php
+	modifyUser.php
 	passOrder.php

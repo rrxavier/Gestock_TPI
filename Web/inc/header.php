@@ -52,11 +52,11 @@ session_start();
 							</ul>
 						</div>
 					</div>
-					<div class="col-sm-2">
+					<!-- <div class="col-sm-2">
 						<div class="search_box pull-right">
 							<input type="text" placeholder="Search..."/>
 						</div>
-					</div>
+					</div>-->
 				</div>
 			</div>
 		</div><!--/header-middle-->
