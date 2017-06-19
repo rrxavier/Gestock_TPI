@@ -1,4 +1,15 @@
 <?php 
+
+#--------------------------------------------------------------------------
+# TPI 2017 - Author :   Oliveira Ricardo
+# Filename :            category.php
+# Date :                07.06.17
+#--------------------------------------------------------------------------
+# This file shows all products of a selected category.
+#
+# Version 1.0 :         07.06.17
+#--------------------------------------------------------------------------
+
 	require_once 'inc/header.php';
 	require_once 'inc/DataToHtml.php';
 	ob_start();

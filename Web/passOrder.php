@@ -13,16 +13,15 @@
 require_once 'inc/Gestock.php';
 session_start();
 
-if(!isset($_SESSION['user']))
+if(!isset($_SESSION['user'])) // If not logged in.
     header('Location: index.php');
-
-
 $result = Gestock::getInstance()->passOrder($_SESSION['user']['id']);
 
-if(is_bool($result))
+if(is_bool($result))    // If everyhing went well.
 {
     if($result)
     {
+        // Update the user's info in the session.
         $_SESSION['user'] = Gestock::getInstance()->getUserInfo($_SESSION['user']['id'])[0];
         header('Location: index.php?msg=Order successfully passed !');
     }

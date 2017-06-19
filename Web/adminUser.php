@@ -1,4 +1,15 @@
 <?php
+
+#--------------------------------------------------------------------------
+# TPI 2017 - Author :   Oliveira Ricardo
+# Filename :            adminUser.php
+# Date :                15.06.17
+#--------------------------------------------------------------------------
+# This file is used to modify the info of a existing user.
+#
+# Version 1.0 :         15.06.17
+#--------------------------------------------------------------------------
+
 require_once 'inc/header.php'; 
 require_once 'inc/DataToHtml.php';
 

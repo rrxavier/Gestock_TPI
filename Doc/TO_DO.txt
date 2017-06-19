@@ -1,0 +1,5 @@
+- Ajout cartouche dans fichiers.
+- Ajout d'commentaires dans le code.
+- Ajout User-Guide.
+- Vérifier orthographe.
+- Vérifier choses à ajouter dans doc.

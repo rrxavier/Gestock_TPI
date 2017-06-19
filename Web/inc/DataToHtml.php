@@ -3,11 +3,11 @@
 #--------------------------------------------------------------------------
 # TPI 2017 - Author :   Oliveira Ricardo
 # Filename :            DataToHtml.php
-# Date :                14.06.17
+# Date :                15.06.17
 #--------------------------------------------------------------------------
 # Build the HTML code from the data returned by "Gestock".
 #
-# Version 1.0 :         14.06.17
+# Version 1.0 :         15.06.17
 #--------------------------------------------------------------------------
 
 require_once 'inc/Gestock.php';
@@ -19,7 +19,7 @@ class DataToHtml
 {
     /**
      * Builds the HTML code to show the Categories on the left side of the site.
-     * @return The HTML code for the Categories.
+     * @return string The HTML code for the Categories.
      */
     static public function CategoriesToHtml()
     {							
@@ -60,8 +60,8 @@ class DataToHtml
     
     /**
      * Builds the HTML code to build the paging of any file.
-     * @param int $page Current page of the file.
-     * @param array $actualParametter Any additionnal parametter to add to the URL.
+     * @param INT $page Current page of the file.
+     * @param Array $actualParametter Any additionnal parametter to add to the URL.
      * @return string The HTML code for the pagination, and the links.
      */
     static public function PaginationToHtml($page, $actualParametter = array("name" => "", "value" => null))
@@ -91,7 +91,7 @@ class DataToHtml
 
     /**
      * Builds the HTML code to show in the cart page.
-     * @param type $idUser ID of the owner of the cart.
+     * @param INT $idUser ID of the owner of the cart.
      * @return string The built HTML code.
      */
     static public function CartProductsToHTML($idUser)
@@ -124,7 +124,7 @@ class DataToHtml
                     <p class="cart_total_price">' . $product['cartQuantity'] * $product['price'] . '.-</p>
                 </td>
                 <td class="cart_delete">
-                    <a class="cart_quantity_delete" href="deleteProductFromCart.php?id=' . $product['id'] . '"><i class="fa fa-times"></i></a>
+                    <a class="cart_quantity_delete" href="deleteProductFromCart.php?id=' . $product['id'] . '"><i class="glyphicon glyphicon-remove"></i></a>
                 </td>
             </tr>';
             $total += $product['cartQuantity'] * $product['price'];
@@ -137,8 +137,8 @@ class DataToHtml
 
     /**
      * Builds the HTML code to show in the account page, under the "Cart preview" section.
-     * @param type $idUser ID of the owner of the cart.
-     * @return string The build HTML code
+     * @param INT $idUser ID of the owner of the cart.
+     * @return string The built HTML code.
      */
     static public function CartPreview($idUser)
     {
@@ -152,6 +152,11 @@ class DataToHtml
         return $htmlToShow;
     }
 
+    /**
+     * Builds the HTML code to show the preview of the previous orders.
+     * @param INT $idUser User's ID
+     * @return string The build HTML code.
+     */
     static public function PreviousOrdersPreview($idUser)
     {
         $htmlToShow = "";
@@ -164,6 +169,11 @@ class DataToHtml
         return $htmlToShow;
     }
 
+    /**
+     * Builds the HTML code to show the products of a previous order.
+     * @param INT $idUser User's ID
+     * @return string 
+     */
     static public function PreviousOrderProductsToHTML($idUser)
     {
         $products = Gestock::getInstance()->getPreviousOrderProducts($_SESSION['user']['id'], $_GET['id']);
@@ -202,6 +212,11 @@ class DataToHtml
         return $htmlToShow;
     }
 
+    /**
+     * Builds the HTML code to show the all the previous orders.
+     * @param INT $idUser User's ID.
+     * @return string The built HTML code.
+     */
     static public function PreviousOrdersToHTML($idUser)
     {
         $htmlToShow = '';
@@ -210,6 +225,12 @@ class DataToHtml
         return $htmlToShow;
     }
 
+    /**
+     * Builds the HTML code to show the admin list of products containing the given string in their names.
+     * @param INT $page Page to show.
+     * @param string $searchToken String to search in the products names.
+     * @return string The built HTML code.
+     */
     static public function AdminProductsToHTML($page, $searchToken = "")
     {
         $products = Gestock::getInstance()->getProductsLIKE($page * NUMBER_PRODUCTS_SHOWN, $searchToken);
@@ -241,6 +262,33 @@ class DataToHtml
         }
         return $htmlToShow;
     }
+
+    /**
+     * Builds the HTML code to show the list of products (almost) out of stock.
+     * @return string The built HTML code.
+     */
+    static public function AdminLowStockProducts()
+    {
+        $htmlToShow = "";
+        foreach(Gestock::getInstance()->getLowQuantityProducts() as $product)
+                    $htmlToShow .= '<tr><td><img src="img/products/' . $product['imgName'] . '"></td><td><b>' . $product['brand'] . '</b> ' . $product['name'] . '</td><td class="cart_price text-center"><b>' . $product['stockQuantity'] . '</b></td><td class="cart_price text-center text-danger">' . $product['alertQuantity'] . '</td><td class="cart_price text-center"><a href="adminProduct.php?id=' . $product['id'] . '&mode=modify">Restock</a></td></tr>';
+        return $htmlToShow;
+    }
+
+    /**
+     * Builds the HTML code to show the admin list of users.
+     * @return string The built HTML code.
+     */
+    static public function AdminUsers()
+    {
+        $htmlToShow = "";
+        foreach(Gestock::getInstance()->getUsers() as $user)
+                    $htmlToShow .= '<tr><td class="text-center">' . $user['username'] . '</td><td>' . $user['email'] . '</td><td class="text-center">' . $user['money'] . '.-</td><td class="text-center"><p class="cart_total_price"><div class="col-sm-6"><a href="adminUser.php?id=' . $user['id'] . '">Modify</a></div><div class="col-sm-6"><a href="deleteUser.php?id=' . $user['id'] . '">Delete</a></div></p></td></tr>';
+        return $htmlToShow;
+    }
+
+    
+                
 }
 
 ?>

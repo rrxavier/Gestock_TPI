@@ -1,4 +1,15 @@
 <?php
+
+#--------------------------------------------------------------------------
+# TPI 2017 - Author :   Oliveira Ricardo
+# Filename :            adminUsers.php
+# Date :                15.06.17
+#--------------------------------------------------------------------------
+# This file shows all users in the DB to manage them.
+#
+# Version 1.0 :         15.06.17
+#--------------------------------------------------------------------------
+
 require_once 'inc/header.php'; 
 require_once 'inc/DataToHtml.php';
 
@@ -21,9 +32,7 @@ if(!isset($_SESSION['user']) || $_SESSION['user']['idRole_fk'] == 1)
                 </thead>
                 <tbody>
                 <?php
-                //echo DataToHtml::AdminProductsToHTML($page, (isset($_POST['searchAdmin']) ? $_POST['searchAdmin'] : ''));
-                foreach(Gestock::getInstance()->getUsers() as $user)
-                    echo '<tr><td class="text-center">' . $user['username'] . '</td><td>' . $user['email'] . '</td><td class="text-center">' . $user['money'] . '.-</td><td class="text-center"><p class="cart_total_price"><div class="col-sm-6"><a href="adminUser.php?id=' . $user['id'] . '">Modify</a></div><div class="col-sm-6"><a href="deleteUser.php?id=' . $user['id'] . '">Delete</a></div></p></td></tr>';
+                    echo DataToHtml::AdminUsers();
                 ?>
                 </tbody>
             </table>

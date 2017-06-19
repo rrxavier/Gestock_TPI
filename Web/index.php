@@ -1,4 +1,15 @@
 <?php 
+
+#--------------------------------------------------------------------------
+# TPI 2017 - Author :   Oliveira Ricardo
+# Filename :            index.php
+# Date :                6.06.17
+#--------------------------------------------------------------------------
+# Main page of the website. Shows all products in the database.
+#
+# Version 1.0 :         6.06.17
+#--------------------------------------------------------------------------
+
 	require_once 'inc/header.php';
 	require_once 'inc/DataToHtml.php';
 	ob_start();

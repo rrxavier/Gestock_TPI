@@ -1,4 +1,15 @@
 <?php 
+
+#--------------------------------------------------------------------------
+# TPI 2017 - Author :   Oliveira Ricardo
+# Filename :            cart.php
+# Date :                13.06.17
+#--------------------------------------------------------------------------
+# Shows all products in the cart of the user.
+#
+# Version 1.0 :         13.06.17
+#--------------------------------------------------------------------------
+
 require_once 'inc/header.php'; 
 require_once 'inc/DataToHtml.php';
 

@@ -1,4 +1,15 @@
 <?php
+
+#--------------------------------------------------------------------------
+# TPI 2017 - Author :   Oliveira Ricardo
+# Filename :            productDetails.php
+# Date :                7.06.17
+#--------------------------------------------------------------------------
+# Shows all details of a selected product.
+#
+# Version 1.0 :         7.06.17
+#--------------------------------------------------------------------------
+
 	require_once 'inc/header.php';
 	require_once 'inc/DataToHtml.php';
 
@@ -44,7 +55,18 @@
 								</span>
 								<p><b>Brand:</b> <?php echo $product['brand']; ?></p>
 								<p><b>Category:</b> <?php echo $product['category']; ?></p>
-								<p><b>Availability:</b> In Stock</p>
+								<p><b>Availability:</b> 
+								<?php
+
+									if($product['stockQuantity'] > $product['alertQuantity'])
+										echo '<strong class="text-success">In Stock</strong>';
+									else if($product['stockQuantity'] <= $product['alertQuantity'] && $product['stockQuantity'] != 0)
+										echo '<strong class="text-warning">Low stock</strong>';
+									else
+										echo '<strong class="text-danger">Out of stock</strong>';
+
+								?>
+								</p>
 							</div><!--/product-information-->
 						</div>
 					</div><!--/product-details-->					

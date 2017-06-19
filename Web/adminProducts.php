@@ -1,4 +1,15 @@
 <?php
+
+#--------------------------------------------------------------------------
+# TPI 2017 - Author :   Oliveira Ricardo
+# Filename :            adminProducts.php
+# Date :                15.06.17
+#--------------------------------------------------------------------------
+# This file shows the list of all products of the DB to manage them.
+#
+# Version 1.0 :         15.06.17
+#--------------------------------------------------------------------------
+
 require_once 'inc/header.php'; 
 require_once 'inc/DataToHtml.php';
 
@@ -19,7 +30,7 @@ else
         <div class="table-responsive cart_info m-t-5">
         <div class="text-center"><h1>All products</h1></div>
         <div class="row text-center">
-            <a href="adminProduct.php?mode=add"><h2>Ajouter un produit</h2></a>
+            <a href="adminProduct.php?mode=add"><h2>Add a product</h2></a>
         </div>
         <div class="row">
             <form action="adminProducts.php" method="POST" class="form-inline col-sm-12 pull-center"><div class="search_box col-sm-12 input-group input-group-lg"><input class="text-center form-control" name="searchAdmin" type="text" placeholder="SEARCH BY NAME..."></div></form>            

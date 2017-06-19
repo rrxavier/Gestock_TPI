@@ -3,13 +3,13 @@
 #--------------------------------------------------------------------------
 # TPI 2017 - Author :   Oliveira Ricardo
 # Filename :            Gestock.php
-# Date :                14.06.17
+# Date :                16.06.17
 #--------------------------------------------------------------------------
 # Main class of the website. It mainly does the SQL requests.
 # All the prepare statements are created in the object constructor.
 # Then, they're encapsulated in functions that execute them.
 #
-# Version 1.0 :         14.06.17
+# Version 1.0 :         16.06.17
 #--------------------------------------------------------------------------
 
 define("HOST", "127.0.0.1");
@@ -244,6 +244,7 @@ class Gestock
                                                                     LIMIT 5 OFFSET 0");
             $this->ps_R_previousOrders_limit->setFetchMode(PDO::FETCH_ASSOC);
 
+            // Gets the products bougth in a given previous order.
             $this->ps_R_previousOrder_products = $this->dbc->prepare('SELECT products_with_info.*, carts_has_stocks.quantity AS cartQuantity FROM products_with_info, stocks_has_product, carts_has_stocks, carts 
                                                                 WHERE carts.idUser_fk = :idUser 
                                                                 AND carts.id = :idCart
@@ -253,31 +254,36 @@ class Gestock
                                                                 AND carts.dateOrder IS NOT null');
             $this->ps_R_previousOrder_products->setFetchMode(PDO::FETCH_ASSOC);
 
-            // Gets the first five most expensive products. Used for the cart preview.
+            // Gets the last five orders. Used for the order preview.
             $this->ps_R_previousOrders = $this->dbc->prepare("SELECT carts.* FROM carts 
                                                                     WHERE carts.idUser_fk = :idUser 
                                                                     AND carts.dateOrder IS NOT null
                                                                     ORDER BY carts.id DESC");
             $this->ps_R_previousOrders->setFetchMode(PDO::FETCH_ASSOC);
             
-            // Selects the next 9(NUMBER_PRODUCTS_SHOWN) products.
+            // Selects all products where the name contains the given string.
             $this->ps_R_products_LIKE = $this->dbc->prepare("SELECT SQL_CALC_FOUND_ROWS products_with_info.* FROM products_with_info WHERE products_with_info.name LIKE :searchToken LIMIT :limit OFFSET :offset");
             $this->ps_R_products_LIKE->bindParam(":limit", $limit, PDO::PARAM_INT);
             $this->ps_R_products_LIKE->setFetchMode(PDO::FETCH_ASSOC);
 
+            // Select all stocks.
             $this->ps_R_stocks = $this->dbc->prepare("SELECT * FROM stocks");
             $this->ps_R_stocks->setFetchMode(PDO::FETCH_ASSOC);
     
+            // Inserts a new product.
             $this->ps_C_product = $this->dbc->prepare("INSERT INTO products VALUES (null, :name, :brand, :price, 5, :imgName, :idCategory)");
             $this->ps_C_product->setFetchMode(PDO::FETCH_ASSOC);
 
+            // Inserts a new entry in the N,N table to set in which stock the new product is.
             $this->ps_C_stocks_has_product = $this->dbc->prepare("INSERT INTO stocks_has_product VALUES (null, :idStock, LAST_INSERT_ID(), :quantity)");
             $this->ps_C_stocks_has_product->setFetchMode(PDO::FETCH_ASSOC);
 
+            // Deletes the selected product.
             $this->ps_D_product = $this->dbc->prepare("DELETE FROM stocks_has_product WHERE stocks_has_product.idProduct_fk = :idProduct1;
                                                        DELETE FROM products WHERE products.id = :idProduct2;");
             $this->ps_D_product->setFetchMode(PDO::FETCH_ASSOC);
 
+            // Update the selected product's info.
             $this->ps_U_product = $this->dbc->prepare('UPDATE stocks_has_product, products
                                                         SET stocks_has_product.idStock_fk = :idStock, 
                                                         stocks_has_product.quantity = :quantity,
@@ -294,9 +300,11 @@ class Gestock
                                                         AND stocks_has_product.idProduct_fk = products.id');
             $this->ps_U_product->setFetchMode(PDO::FETCH_ASSOC);
 
+            // Selects all users.
             $this->ps_R_users = $this->dbc->prepare('SELECT * FROM users');
             $this->ps_R_users->setFetchMode(PDO::FETCH_ASSOC);
 
+            // Updates the selected user's info.
             $this->ps_U_users = $this->dbc->prepare('UPDATE users 
                                                         SET users.username = :username, 
                                                         users.email = :email, 
@@ -304,9 +312,11 @@ class Gestock
                                                         WHERE users.id = :idUser');
             $this->ps_U_users->setFetchMode(PDO::FETCH_ASSOC);
 
+            // Deletes the selected user.
             $this->ps_D_users = $this->dbc->prepare('DELETE FROM users WHERE users.id = :idUser');
             $this->ps_D_users->setFetchMode(PDO::FETCH_ASSOC);
 
+            // Selects all products that are almost out of stock, or out of stock.
             $this->ps_R_products_low = $this->dbc->prepare('SELECT * FROM products_with_info AS p WHERE p.stockQuantity <= p.alertQuantity');
             $this->ps_R_products_low->setFetchMode(PDO::FETCH_ASSOC);  
         }
@@ -330,7 +340,7 @@ class Gestock
     }
     /**
      * Processes the total number of products of the last set of products.
-     * @return array 
+     * @return Array Array containing the number of products found.
      */
     public function getNbProducts()
     {
@@ -340,7 +350,7 @@ class Gestock
 
     /**
      * Gets all the Categories of the DB.
-     * @return array Array containing all the categories and their fields.
+     * @return Array Array containing all the categories and their fields.
      */
     public function getCategories()
     {
@@ -359,8 +369,8 @@ class Gestock
 
     /**
      * Gets all the fields of one selected product.
-     * @param int $idProduct The id of the product.
-     * @return array Array containing all the fields of the product.
+     * @param INT $idProduct The id of the product.
+     * @return Array Array containing all the fields of the product.
      */
     public function getProductById($idProduct)
     {
@@ -371,8 +381,8 @@ class Gestock
 
     /**
      * Gets the next products, starting at a given offset.
-     * @param int $offset Offset of the SQL statement.
-     * @return array Array containing the different products, and their fields.
+     * @param INT $offset Offset of the SQL statement.
+     * @return Array Array containing the different products, and their fields.
      */
     public function getProducts($offset)
     {
@@ -383,9 +393,9 @@ class Gestock
 
     /**
      * Gets all the products of a given category.
-     * @param int $idCategory The id of the category.
-     * @param int $offset Offset of the SQL statement.
-     * @return type
+     * @param INT $idCategory The id of the category.
+     * @param INT $offset Offset of the SQL statement.
+     * @return Array Array with all the products of the selected category.
      */
     public function getProductsOfCategory($idCategory, $offset)
     {
@@ -397,10 +407,10 @@ class Gestock
 
     /**
      * Inserts a new user in the DB.
-     * @param type $username Username of the user.
-     * @param type $email Email of the user.
-     * @param type $pwd Password of the user. Must be sha1 encrypted.
-     * @return \Exception TRUE if the query succeeded, False if there is an unknown error, and the name of the field if the username OR email already exist in base.
+     * @param string $username Username of the user.
+     * @param string $email Email of the user.
+     * @param string $pwd Password of the user. Must be sha1 encrypted.
+     * @return Bool\Exception TRUE if the query succeeded, False if there is an unknown error, and the name of the field if the username OR email already exist in base.
      */
     public function insertUser($username, $email, $pwd)
     {
@@ -424,9 +434,9 @@ class Gestock
 
     /**
      * Selects the user with the given username and password.
-     * @param type $username User's name.
-     * @param type $password User's password.
-     * @return \Exception Array with the user's info if it succeeds, FALSE if it fails.
+     * @param string $username User's name.
+     * @param string $password User's password.
+     * @return Array\Exception Array with the user's info if it succeeds, FALSE if it fails.
      */
     public function authentifyByUsername($username, $password)
     {
@@ -451,9 +461,9 @@ class Gestock
 
     /**
      * Selects the user with the given email and password.
-     * @param type $email User's email.
-     * @param type $password User's password.
-     * @return \Exception Array with the user's info if it succeeds, FALSE if it fails.
+     * @param string $email User's email.
+     * @param string $password User's password.
+     * @return Array\Bool Array with the user's info if it succeeds, FALSE if it fails.
      */
     public function authentifyByEmail($email, $password)
     {
@@ -479,7 +489,7 @@ class Gestock
     /**
      * Get the current cart of a given user. If he doesn't have one, creates one.
      * @param type $idUser  The id of the owner of the cart.
-     * @return \Exception   The cart if the script successfully executed, FALSE if an error occurred.
+     * @return Array\Exception   The cart if the script successfully executed, FALSE if an error occurred.
      */
     private function getCart($idUser)
     {
@@ -554,8 +564,8 @@ class Gestock
 
     /**
      * Gets all the products of the cart of the selected user.
-     * @param type $idUser ID of the owner of the cart.
-     * @return boolean Array with the product if everything went well, FALSE if an error occurred.
+     * @param INT $idUser ID of the owner of the cart.
+     * @return Array\boolean Array with the product if everything went well, FALSE if an error occurred.
      */
     public function getCartProducts($idUser)
     {
@@ -575,8 +585,8 @@ class Gestock
 
     /**
      * Delets a given product from the cart of the selected user.
-     * @param type $idProduct ID of the product to delete.
-     * @param type $idUser ID of the owner of the cart.
+     * @param INT $idProduct ID of the product to delete.
+     * @param INT $idUser ID of the owner of the cart.
      * @return boolean TRUE if everything went well, FALSE if an error occurred.
      */
     public function deleteProductFromCart($idProduct, $idUser)
@@ -598,8 +608,8 @@ class Gestock
 
     /**
      * Gets the first five products of the user's cart. The products are ordered from the most expensive to the cheapest.
-     * @param type $idUser ID of the owner of the cart.
-     * @return type Array with the products if everything went well, empty Array if an error occurred.
+     * @param INT $idUser ID of the owner of the cart.
+     * @return Array Array with the products if everything went well, empty Array if an error occurred.
      */
     public function getFirstCartProducts($idUser)
     {
@@ -617,6 +627,11 @@ class Gestock
         }
     }
 
+    /**
+     * Select all the info of a selected user.
+     * @param INT $idUser User's ID.
+     * @return Array? The user's info if everything went well, null if an error occurred.
+     */
     public function getUserInfo($idUser)
     {
         try
@@ -633,20 +648,27 @@ class Gestock
         }
     }
 
+    /**
+     * Transforms the cart of the selected user into an order.
+     * Substacts the order total price from the user's money.
+     * Substracts ordered quantity from the stock quantity of a product.
+     * @param INT $idUser User's ID.
+     * @return boolean|string True if everything went well, false if an error occured, or an error message if an order condition was not met.
+     */
     public function passOrder($idUser)
     {
         try
         {
             $itemCount = count($this->getCartProducts($idUser)); 
 
-            if($itemCount > 0)
+            if($itemCount > 0)  // If the cart is not empty.
             {
                 $this->ps_R_carts_has_stocks_notInStock->bindParam(":idUser", $idUser);
                 $this->ps_R_carts_has_stocks_notInStock->execute();
                 $notInStockItems = $this->ps_R_carts_has_stocks_notInStock->fetchAll();
-                if(count($notInStockItems))
+                if(count($notInStockItems))     // If some items aren't in stock.
                     return "NotInStock";
-                else
+                else    // If all items are in stock.
                 {
                     $this->ps_R_carts_has_stocks_totalPrice->bindParam(":idUser", $idUser);
                     $this->ps_R_carts_has_stocks_totalPrice->execute();
@@ -654,40 +676,45 @@ class Gestock
 
                     $user = $this->getUserInfo($idUser)[0];
 
-                    if($totalPrice <= $user['money'])
+                    if($totalPrice <= $user['money'])   // If the users has enough money.
                     {
-                        $this->dbc->beginTransaction();
+                        $this->dbc->beginTransaction();     // Starts a new transaction in case if something goes wrong.
 
                         $this->ps_U_stocks_quantity->bindParam(":idUser", $idUser);
-                        $this->ps_U_stocks_quantity->execute();
+                        $this->ps_U_stocks_quantity->execute();     // Set the new quantity of the products.
 
                         $this->ps_U_cart->bindParam(":idUser", $idUser);
-                        $this->ps_U_cart->execute();
+                        $this->ps_U_cart->execute();    // Sets an order date to the user's cart.
 
                         $this->ps_U_user_money->bindParam(":cost", $totalPrice);
                         $this->ps_U_user_money->bindParam(":idUser", $idUser);
-                        $this->ps_U_user_money->execute();                       
+                        $this->ps_U_user_money->execute();  // Sets the new amount of money that the user have.               
 
-                        $this->dbc->commit();
+                        $this->dbc->commit();   // Accept changes.
 
                         return true;
                     }
-                    else
+                    else    // If the user hasn't enough money.
                         return "NotEnoughMoney";
                 }        
             }
-            else
+            else    // If the cart is empty.
                 return "NoItemsInCart";
         }
         catch (Exception $e)
         {
             if(PDO::inTransaction())
-                $this->dbc->rollback();
+                $this->dbc->rollback();     // Rollback changes.
             error_log($e);
             return false;
         }
     }
 
+    /**
+     * Get the 5 latest orders of a given user.
+     * @param INT $idUser User's ID.
+     * @return Array Array containing the passed orders if everything went well, empty array if an error occurred.
+     */
     public function getFirstPreviousOrders($idUser)
     {
         try
@@ -704,12 +731,18 @@ class Gestock
         }
     }
 
-    public function getPreviousOrderProducts($idUser, $idCart)
+    /**
+     * Gets all products of a passed order.
+     * @param INT $idUser User's ID.
+     * @param INT $idOrder Order's ID.
+     * @return Array Array containing thr products if everything went well, empty array if an error occurred.
+     */
+    public function getPreviousOrderProducts($idUser, $idOrder)
     {
         try
         {
             $this->ps_R_previousOrder_products->bindParam(":idUser", $idUser);
-            $this->ps_R_previousOrder_products->bindParam(":idCart", $idCart);
+            $this->ps_R_previousOrder_products->bindParam(":idCart", $idOrder);
             $this->ps_R_previousOrder_products->execute();
 
             return $this->ps_R_previousOrder_products->fetchAll();
@@ -721,6 +754,11 @@ class Gestock
         }
     }
 
+    /**
+     * Gets all previous orders of the given user.
+     * @param INT $idUser User's ID.
+     * @return Array Array containing the passed orders if everything went well, empty array if an error occurred.
+     */
     public function getPreviousOrders($idUser)
     {
         try
@@ -737,6 +775,12 @@ class Gestock
         }
     }
     
+    /**
+     * Get all products that contain the given string in their names.
+     * @param INT $offset Offset to know at which page we are.
+     * @param string $searchToken The string to search in the product name.
+     * @return type
+     */
     public function getProductsLIKE($offset, $searchToken)
     {
         try
@@ -754,6 +798,10 @@ class Gestock
         }
     }
 
+    /**
+     * Gets all stocks.
+     * @return Array Array containing the stocks if everything went well, empty array if an error occurred.
+     */
     public function getStocks()
     {
         try
@@ -768,6 +816,17 @@ class Gestock
         }
     }
     
+    /**
+     * Inserts a new products to the DB.
+     * @param string $name The new product's name.
+     * @param string $brand The new product's brand.
+     * @param INT $price The new product's price.
+     * @param INT $idCategory The new product's category's ID.
+     * @param INT $quantity The new product's quantity.
+     * @param string $imgName The new product's image name.
+     * @param INT $idStock The new product's stock ID.
+     * @return boolean|\Exception TRUE if everything went well, the exception if an error occurred.
+     */
     public function insertProduct($name, $brand, $price, $idCategory, $quantity, $imgName, $idStock)
     {
         try
@@ -792,11 +851,15 @@ class Gestock
         {
             $this->dbc->rollback();
             error_log($e);
-            //echo $name, " ", $brand, " ", $price, " " . $idCategory, " ", $quantity, " ", $imgName, " ", $idStock;
             return $e;
         }
     }
 
+    /**
+     * Deletes a product.
+     * @param INT $idProduct ID of the product to delete.
+     * @return boolean|\Exception TRUE if everything went well, the exception if an error occured.
+     */
     public function deleteProduct($idProduct)
     {
         try
@@ -814,6 +877,18 @@ class Gestock
         }
     }
 
+    /**
+    * Modifies a product.
+    * @param string $name The new product's name.
+    * @param string $brand The new product's brand.
+    * @param INT $price The new product's price.
+    * @param INT $idCategory The new product's category's ID.
+    * @param INT $quantity The new product's quantity.
+    * @param string $imgName The new product's image name.
+    * @param INT $idStock The new product's stock ID.
+    * @param INT $idProduct The ID of the product to update.
+    * @return boolean|\Exception TRUE if everything went well, the exception if an error occurred.
+    */
     public function modifyProduct($name, $brand, $price, $idCategory, $quantity, $imgName = "", $idStock, $idProduct)
     {
         try
@@ -842,6 +917,10 @@ class Gestock
         }
     }
 
+    /**
+     * Get all users.
+     * @return Array Array containing all users if everything went well, empty array if an error occurred.
+     */
     public function getUsers()
     {
         try
@@ -856,6 +935,14 @@ class Gestock
         }        
     }
 
+    /**
+     * Modifies the given user.
+     * @param INT $idUser User's ID.
+     * @param string $username User's new username.
+     * @param string $email User's new email.
+     * @param INT $money User's new amount of money.
+     * @return boolean|\Excetpion TRUE if everything went well, the exception if an error occured.
+     */
     public function modifyUser($idUser, $username, $email, $money)
     {
         try
@@ -874,6 +961,11 @@ class Gestock
         }
     }
 
+    /**
+     * Delete an user.
+     * @param type $idUser The ID of the user to delete.
+     * @return boolean|\Excetpion TRUE if everything went well, the exception if an error occured.
+     */
     public function deleteUser($idUser)
     {
        try
@@ -889,6 +981,10 @@ class Gestock
         } 
     }
 
+    /**
+     * Gets all products that are almost out of stock, or out of stock.
+     * @return Array\Excetpion Array containing the products, the exception if an error occured.
+     */
     public function getLowQuantityProducts()
     {
         try

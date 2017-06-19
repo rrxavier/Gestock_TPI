@@ -36,7 +36,7 @@ function addToCart(idProduct, returnPopup = true, quantity = 1)
                     addPopup("Error, try again.");
             },
             error: function(jqXHR) {
-                 alert(jqXHR.responseText + "" + jqXHR.status);
+                 //alert(jqXHR.responseText + "" + jqXHR.status);
             }
     });
 }

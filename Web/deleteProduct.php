@@ -1,4 +1,16 @@
 <?php
+
+#--------------------------------------------------------------------------
+# TPI 2017 - Author :   Oliveira Ricardo
+# Filename :            deleteProduct.php
+# Date :                15.06.17
+#--------------------------------------------------------------------------
+# This script deletes a product from the DB.
+# Returns to the product listing page if it works, kills the script if an error occured.
+#
+# Version 1.0 :         15.06.17
+#--------------------------------------------------------------------------
+
 require_once 'inc/Gestock.php';
 session_start();
 

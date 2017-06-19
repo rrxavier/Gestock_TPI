@@ -1,5 +1,16 @@
 <?php
 session_start();
+
+#--------------------------------------------------------------------------
+# TPI 2017 - Author :   Oliveira Ricardo
+# Filename :            header.php.php
+# Date :                16.06.17
+#--------------------------------------------------------------------------
+# File added to each user page to add the header at the beginning.
+#
+# Version 1.0 :         16.06.17
+#--------------------------------------------------------------------------
+
 ?>
 
 <!DOCTYPE html>
@@ -7,16 +18,10 @@ session_start();
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="">
-    <meta name="author" content="">
+    <meta name="author" content="Ricardo Oliveira">
     <title>Gestock</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link href="css/font-awesome.min.css" rel="stylesheet">
-    <link href="css/prettyPhoto.css" rel="stylesheet">
-    <link href="css/price-range.css" rel="stylesheet">
-    <link href="css/animate.css" rel="stylesheet">
 	<link href="css/main.css" rel="stylesheet">
-	<link href="css/responsive.css" rel="stylesheet">
 	<link href="css/gestockStyle.css" rel="stylesheet">
     <link rel="icon" href="img/favicon.png">
 </head><!--/head-->
@@ -52,11 +57,6 @@ session_start();
 							</ul>
 						</div>
 					</div>
-					<!-- <div class="col-sm-2">
-						<div class="search_box pull-right">
-							<input type="text" placeholder="Search..."/>
-						</div>
-					</div>-->
 				</div>
 			</div>
 		</div><!--/header-middle-->

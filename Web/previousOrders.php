@@ -1,4 +1,15 @@
 <?php
+
+#--------------------------------------------------------------------------
+# TPI 2017 - Author :   Oliveira Ricardo
+# Filename :            previousOrders.php
+# Date :                15.06.17
+#--------------------------------------------------------------------------
+# Shows all orders passed from the currently logged user.
+#
+# Version 1.0 :         15.06.17
+#--------------------------------------------------------------------------
+
 require_once 'inc/header.php'; 
 require_once 'inc/DataToHtml.php';
 

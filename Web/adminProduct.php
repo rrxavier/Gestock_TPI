@@ -1,4 +1,16 @@
 <?php
+
+#--------------------------------------------------------------------------
+# TPI 2017 - Author :   Oliveira Ricardo
+# Filename :            adminProduct.php
+# Date :                15.06.17
+#--------------------------------------------------------------------------
+# This file is used to enter the values to add a product if the mode is set to "Add".
+# If the mode equals "Modify", it is used to change the data about a product and modify it in the DB.
+#
+# Version 1.0 :         15.06.17
+#--------------------------------------------------------------------------
+
 require_once 'inc/header.php'; 
 require_once 'inc/DataToHtml.php';
 
@@ -19,7 +31,7 @@ if($mode)
 
         $product = Gestock::getInstance()->getProductById($idProduct);
         if(count($product) == 0)
-            header('Location: login.php');
+            header('Location: adminProducts.php');
         $product = $product[0];
         $htmlMode = "Modify";
     }

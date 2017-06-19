@@ -1,4 +1,15 @@
 <?php
+
+#--------------------------------------------------------------------------
+# TPI 2017 - Author :   Oliveira Ricardo
+# Filename :            login.php
+# Date :                9.06.17
+#--------------------------------------------------------------------------
+# This page allows the users to create an account, or to login if he already has one.
+#
+# Version 1.0 :         9.06.17
+#--------------------------------------------------------------------------
+
 	require_once 'inc/header.php';
 	require_once 'inc/DataToHtml.php';
 
@@ -7,7 +18,6 @@
 
 	$msg = FILTER_INPUT(INPUT_GET, "msg");
 ?>
-	<!-- <div id="msgBox"><span>TEST</span></div> ERROR MSG SLIDDER TO DO-->
 		
 	<section id="form"><!--form-->
 		<div class="container">

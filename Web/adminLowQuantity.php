@@ -1,4 +1,15 @@
 <?php
+
+#--------------------------------------------------------------------------
+# TPI 2017 - Author :   Oliveira Ricardo
+# Filename :            adminLowQuantity.php
+# Date :                15.06.17
+#--------------------------------------------------------------------------
+# This file shows the list of almost out of stock/out of stock products. 
+#
+# Version 1.0 :         15.06.17
+#--------------------------------------------------------------------------
+
 require_once 'inc/header.php'; 
 require_once 'inc/DataToHtml.php';
 
@@ -22,8 +33,7 @@ if(!isset($_SESSION['user']) || $_SESSION['user']['idRole_fk'] == 1)
                 </thead>
                 <tbody>
                 <?php
-                foreach(Gestock::getInstance()->getLowQuantityProducts() as $product)
-                    echo '<tr><td><img src="img/products/' . $product['imgName'] . '"></td><td><b>' . $product['brand'] . '</b> ' . $product['name'] . '</td><td class="cart_price text-center"><b>' . $product['stockQuantity'] . '</b></td><td class="cart_price text-center text-danger">' . $product['alertQuantity'] . '</td><td class="cart_price text-center"><a href="adminProduct.php?id=' . $product['id'] . '&mode=modify">Restock</a></td></tr>';
+                    echo DataToHtml::AdminLowStockProducts();
                 ?>
                 </tbody>
             </table>

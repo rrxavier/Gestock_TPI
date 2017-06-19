@@ -1,0 +1,9 @@
+- Ajout images Analyse concurrentielle
+- Ajout du plan graphique
+- Ajout description plan fonctionnel
+- Ajout des dictionnaire de données
+- Ajout de l'arborescence du site
+- Ajout fichier "gestock.js" dans "Conception du code"
+- Ajout du plan/rapport de tests
+- Ajout du guide d'installation
+- Peaufinage du site
